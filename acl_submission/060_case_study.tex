@@ -1,0 +1,54 @@
+\section{ALERT-Dataset}
+\label{sec:dataset}
+ALERT-Dataset is a curated benchmark of AI-related copyright and intellectual-property litigation for structured risk analysis.
+
+\subsection{Construction and Statistics}
+ALERT-Dataset compiles CourtListener/RECAP filings and supplementary legal-news signals from January 2020 to December 2025, with filings concentrated in 2023--2025~\citep{bommasani2021opportunities}. Each record follows the 22-field \texttt{ai-suit-sensing.csv} schema (Table~\ref{tab:full_schema}, appendix). Table~\ref{tab:dataset_stats} summarizes the final annotated subset; Table~\ref{tab:dataset_annual} reports the raw annual ingestion counts before deduplication and quality screening.
+
+\begin{table}[t]
+\centering
+\caption{ALERT-Dataset summary statistics. The 3-class risk label merges \emph{critical}+\emph{high} into \emph{High}. Status counts sum to all 1,247 cases; \texttt{Pending}/\texttt{Judgment}/\texttt{Closed} are 0 in this snapshot.}
+\label{tab:dataset_stats}
+\footnotesize
+\setlength{\tabcolsep}{6pt}
+\begin{tabular}{p{4.2cm} c}
+\toprule
+\textbf{Attribute} & \textbf{Value} \\
+\midrule
+Total cases & 1,247 \\
+Total documents & 8,934 \\
+Coverage period & 2020--2025 \\
+Unique defendants & 43 \\
+Risk labels & 3 (High/Med/Low) \\
+Status dist.\ (Init/Active/Settled/Dismissed) & 298/695/148/106 \\
+Product-mapping GT cases & 312 \\
+\bottomrule
+\end{tabular}
+\end{table}
+
+Each record contains docket metadata, parties, document URLs, and a human-verified litigation summary. Status labels encode workflow state rather than adjudicated outcome; severity is reported separately and is not interpreted as liability.
+
+\begin{table}[t]
+\centering
+\caption{Annual filing breakdown by litigation type. Counts are raw ingested filings (1,260) before deduplication; the annotated subset contains 1,247 cases.}
+\label{tab:dataset_annual}
+\resizebox{\columnwidth}{!}{%
+\begin{tabular}{lcccc|c}
+\toprule
+\textbf{Year} & \textbf{Copyright} & \textbf{DMCA} & \textbf{Trade Secret} & \textbf{Other} & \textbf{Total} \\
+\midrule
+2020 & 28  & 9   & 7  & 3  & 47  \\
+2021 & 41  & 14  & 10 & 4  & 69  \\
+2022 & 89  & 31  & 22 & 8  & 150 \\
+2023 & 198 & 72  & 51 & 19 & 340 \\
+2024 & 261 & 96  & 64 & 24 & 445 \\
+2025 & 122 & 47  & 29 & 11 & 209 \\
+\midrule
+\textbf{Total} & \textbf{739} & \textbf{269} & \textbf{183} & \textbf{69} & \textbf{1,260} \\
+\bottomrule
+\end{tabular}%
+}
+\end{table}
+
+\subsection{Annotation and Availability}
+An automated pre-labeler first assigns a triage score using Table~\ref{tab:risk_matrix}; three legal research specialists then independently review a stratified sample of 400 cases under a fixed guideline. During adjudication, annotators see docket text, product attributes, candidate theory cards, and query dates, but not system identity or the retained pre-label source. The remaining 847 cases retain automated pre-labels, with a 5\% spot-check showing 91\% agreement with at least one specialist. Inter-annotator agreement on the 400-case sample is Cohen's $\kappa=0.74$~\citep{landis1977kappa}. Because retained labels can inflate metrics, we release per-record provenance, keep all primary claims on the human-only evaluation, and use retained-label results only as scale-oriented comparisons. The top three defendants account for 41.3\%, limiting representativeness for smaller vendors and non-U.S. jurisdictions. The dataset, guidelines, split files, seeds, evaluation scripts, and logs are released for review at the anonymized repository.

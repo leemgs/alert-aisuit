@@ -1,0 +1,531 @@
+% NOTE: \appendix is issued by the main driver (main.tex) before this file
+% is \input, so it is intentionally NOT repeated here.
+
+\clearpage % start the appendix on a fresh page
+
+% Reset float counters and use an "A." prefix so appendix tables/figures
+% (e.g. Table A.1) are numbered independently of the main body.
+\setcounter{table}{0}
+\setcounter{figure}{0}
+\renewcommand{\thetable}{A.\arabic{table}}
+\renewcommand{\thefigure}{A.\arabic{figure}}
+
+\section*{Technical Appendix}
+
+This appendix supplements the main text with material that supports reproducibility but exceeds the page budget of the body. It contains the full 22-field schema, the ingestion-layer scoring matrix, formatted \texttt{History}/\texttt{Progress Notes} examples, open-source implementation details and configuration parameters of \texttt{ai-suit-tracker}, treatment-edge extraction accuracy, the schema-completeness/agentic-loop/retriever ablations, goal-predicate hyperparameters with agent prompt templates and evaluation-protocol notes, and the proof of Proposition~\ref{prop:termination} with the conformal calibration and temporal-shift audit.
+
+\section{Full \texttt{ai-suit-sensing.csv} Schema}
+\label{app:full_schema}
+
+Table~\ref{tab:full_schema} lists all 22 fields of \texttt{ai-suit-sensing.csv}, with type, requirement level (R\,=\,Required, Rec\,=\,Recommended, O\,=\,Optional), and description.
+
+\begin{table}[h]
+\centering
+\caption{The full 22-field \texttt{ai-suit-sensing.csv} schema.}
+\label{tab:full_schema}
+\scriptsize
+\setlength{\tabcolsep}{3.5pt}
+\resizebox{\columnwidth}{!}{%
+\begin{tabular}{r l l c p{3.4cm}}
+\toprule
+\textbf{\#} & \textbf{Field} & \textbf{Type} & \textbf{Req} & \textbf{Description} \\
+\midrule
+1  & Case No.         & Int      & R   & Auto-incrementing index \\
+2  & Case Title       & String   & R   & Plaintiff v.\ Defendant \\
+3  & Filing Date      & Date     & R   & Date filed (YYYY-MM-DD) \\
+4  & Docket No.       & String   & R   & Court-assigned number \\
+5  & Plaintiff        & String   & R   & Name(s), comma-separated \\
+6  & Defendant        & String   & R   & Name(s), comma-separated \\
+7  & Target Data      & String   & R   & Training data type alleged \\
+8  & Target Product   & String   & R   & AI product implicated \\
+9  & Jurisdiction     & String   & R   & Country of filing \\
+10 & Court            & String   & R   & Official court name \\
+11 & Status           & Enum     & R   & Lifecycle code \\
+12 & Last Update      & Date     & R   & Most recent refresh date \\
+13 & Cause of Action  & String   & R   & Core legal claim(s) \\
+14 & Claim (USD)      & String   & Rec & Damages or statutory range \\
+15 & Summary          & Long str & Rec & AI-generated case narrative \\
+16 & Tracker URL      & URL      & Rec & CourtListener/PACER link \\
+17 & Source URL       & String   & O   & Initial discovery source \\
+18 & History          & Long str & R   & Chronological update log \\
+19 & Plaintiff Atty.  & String   & O   & Lead plaintiff counsel \\
+20 & Progress Notes   & Long str & Rec & Markdown update log \\
+21 & Defense Atty.    & String   & O   & Lead defense counsel \\
+22 & Remarks          & String   & O   & Press links, extra context \\
+\bottomrule
+\end{tabular}%
+}
+\end{table}
+
+\section{Ingestion-Layer Scoring Matrix}
+\label{app:risk_matrix}
+
+Table~\ref{tab:risk_matrix} lists the additive ingestion-layer scoring matrix (main text) used for real-time triage and as the automated pre-labeler. The critical-composite bonus fires only when copyright and model-training evidence co-occur. This heuristic is a baseline, never ground truth.
+
+\begin{table}[h]
+\centering
+\caption{Ingestion-layer scoring matrix. The critical-composite bonus fires only when copyright and model-training evidence co-occur.}
+\label{tab:risk_matrix}
+\small
+\setlength{\tabcolsep}{3.5pt}
+\resizebox{\columnwidth}{!}{%
+\begin{tabular}{p{3.0cm}p{3.4cm}c}
+\toprule
+\textbf{Evidence Category} & \textbf{Key Indicators} & \textbf{Score} \\
+\midrule
+\textbf{Critical composite} & \textbf{Copyright $\wedge$ Training co-cited} & \textbf{+50} \\
+Copyright direct mention      & NOS 820, copyright keyword                 & +30 \\
+Unauthorized collection       & scrape, crawl, ingest, harvest             & +25 \\
+Direct model training mention & train, LLM, transformer, diffusion          & +20 \\
+Copyright / IP dispute        & infringement, DMCA, fair use                & +10 \\
+Commercial exploitation       & profit, revenue, subscription               & +10 \\
+Class action filing           & class action, putative class                & +5 \\
+Licensed data cooperation     & contract, licensing, partnership            & $-$10 \\
+\bottomrule
+\end{tabular}%
+}
+\end{table}
+
+\section{Formatted Examples: History and Progress Notes}
+\label{app:examples}
+
+The \texttt{History} field (field~18) records a reverse-chronological timeline using the format \texttt{YYYY-MM-DD, [event]}:
+\begin{mycodebox}
+\small\texttt{2025-03-06, Plaintiff requests \$15,000 per infringed work.}\\
+\texttt{2025-03-01, Complaint filed alleging unauthorized use of}\\
+\texttt{\phantom{xxxx}copyrighted dataset for AI model training.}
+\end{mycodebox}
+
+The \texttt{Progress Notes} field (field~20) uses Markdown \texttt{\#\#} headers to distinguish initial from subsequent updates (the entry below is a \emph{synthetic format illustration}, not a real case):
+\begin{mycodebox}
+\small\texttt{\#\# (Started), 2025-03-17, [Plaintiff] v.\ [Defendant] ---}\\
+\texttt{\phantom{xxxx}Unauthorized training-data use; commercial use claimed.}\\
+\texttt{\#\# (Updated), 2025-03-18, Preliminary injunction}\\
+\texttt{\phantom{xxxx}motion filed by plaintiff.}
+\end{mycodebox}
+
+\section{Open-Source Implementation Details}
+\label{app:impl}
+
+The \texttt{ai-suit-tracker} tool runs on an adaptive, configurable GitHub Actions schedule: hourly during a configurable business-hours window and two-hourly off-hours. On-demand execution via \texttt{workflow\_dispatch} is also supported. Its principal modules are:
+
+\begin{itemize}
+  \item \textbf{Query engine} (\texttt{src/queries.py}): five \texttt{COURTLISTENER\_QUERIES} (complaint/petition filters with AI keywords, CourtListener REST API v4) plus four \texttt{NEWS\_QUERIES} for Google News RSS.
+  \item \textbf{Ingestion pipeline} (\texttt{src/run.py}): orchestrates polling, RSS monitoring, docket backtracking, and cross-issue deduplication using \texttt{PREVIOUS\_ITEM\_DEDUP\_DAYS}.
+  \item \textbf{Complaint parser} (\texttt{src/complaint\_parse.py}, \texttt{src/pdf\_text.py}): extracts cause-of-action language, training snippets, and parties from RECAP PDFs.
+  \item \textbf{Risk scorer} (\texttt{src/render.py}): applies the seven-category additive matrix \emph{plus} the critical-composite (+50) co-occurrence rule of Table~\ref{tab:risk_matrix} to produce a 0--100 score with a four-band severity indicator.
+  \item \textbf{Hybrid deduplication} (\texttt{src/dedup.py}): a two-stage pipeline (Algorithm~\ref{alg:hybrid_dedup}) that combines lexical title/docket matching with optional semantic similarity using Gemini \texttt{text-embedding-004} embeddings (cosine threshold \texttt{SEMANTIC\_DEDUP\_THRESHOLD}=0.85). Activation is gated by the \texttt{GEMINI\_SEMANTIC\_DEDUP} flag.
+  \item \textbf{Multi-modal reporting} (\texttt{src/gemini.py}, \texttt{src/trend.py}): a Gemini Flash trend summary at $\approx$1--3 calls per run, plus an optional Imagen-3 visual brief (\texttt{GEMINI\_DAILY\_REPORT\_IMAGEGEN}) attached to the day-close summary. A provider-agnostic interface accommodates alternative LLM/diffusion back-ends.
+  \item \textbf{Reporting integrations}: posts to GitHub Issues with a three-tier hierarchical structure (issue body / morning trend summary / evening deduplicated table) and a parallel Slack notification.
+\end{itemize}
+
+\begin{algorithm}[h]
+\caption{Hybrid Lexical--Semantic Deduplication}
+\label{alg:hybrid_dedup}
+
+\begin{algorithmic}[1]
+\REQUIRE Candidate items $\mathcal{N}_{\text{new}}$, baseline items $\mathcal{N}_{\text{base}}$ (prior issues), threshold $\sigma$
+\ENSURE Deduplicated set $\mathcal{N}^*$
+\STATE $T_b \gets$ \textsc{ExtractTitles}($\mathcal{N}_{\text{base}}$)
+\STATE $\mathcal{R} \gets \{i \in \mathcal{N}_{\text{new}} \,|\, \mathrm{title}(i) \notin T_b\}$ \COMMENT{Stage 1: exact-title lexical filter}
+\IF{\textsc{LLMEnabled} $\wedge$ $|\mathcal{R}|>0$}
+  \STATE $E_{\text{curr}} \gets$ \textsc{GeminiEmbed}($\{\mathrm{title}(i) : i\in\mathcal{R}\}$)
+  \STATE $E_{\text{base}} \gets$ \textsc{GeminiEmbed}($T_b$)
+  \STATE $\mathcal{S} \gets \{i \in \mathcal{R} \,|\, \exists\, e\in E_{\text{base}}: \cos(E_{\text{curr}}[i],e) \geq \sigma\}$
+  \STATE $\mathcal{R} \gets \mathcal{R} \setminus \mathcal{S}$ \COMMENT{Stage 2: semantic filter}
+\ENDIF
+\STATE \textbf{return} $\mathcal{N}^* \gets \mathcal{R}$ \COMMENT{$\approx$2 embedding calls/run; free-tier compatible}
+\end{algorithmic}
+\end{algorithm}
+
+Table~\ref{tab:impl_config} lists the key configuration parameters of \texttt{ai-suit-tracker} (v02), covering API credentials, scheduling, deduplication, and reporting options. All secrets are injected via GitHub Secrets; environment variables are set via GitHub Variables.
+
+\begin{table}[h]
+\centering
+\caption{Key configuration parameters of \texttt{ai-suit-tracker} (v02). Secrets via GitHub Secrets; variables via GitHub Variables.}
+\label{tab:impl_config}
+\scriptsize
+\setlength{\tabcolsep}{3pt}
+\resizebox{\columnwidth}{!}{%
+\begin{tabular}{l l p{3.2cm}}
+\toprule
+\textbf{Parameter} & \textbf{Default} & \textbf{Description} \\
+\midrule
+\texttt{LOOKBACK\_DAYS}                  & 3              & Days of history to retrieve \\
+\texttt{COURTLISTENER\_TOKEN}            & ---            & CourtListener API v4 token \\
+\texttt{ISSUE\_TITLE\_BASE}              & ---            & Base title for GitHub Issues \\
+\texttt{ISSUE\_LABEL}                    & \texttt{aisuit} & GitHub Issue label \\
+\texttt{GEMINI\_API\_KEY}                & ---            & LLM API key (optional) \\
+\texttt{GEMINI\_MODEL}                   & \texttt{gemini-flash-latest} & Gemini model id \\
+\texttt{GEMINI\_AISUIT\_TREND\_DAYS}     & (unset)        & Trend window (days) \\
+\texttt{GEMINI\_SEMANTIC\_DEDUP}         & 0              & Enable semantic dedup (stage~2) \\
+\texttt{SEMANTIC\_DEDUP\_THRESHOLD}      & 0.85           & Cosine threshold for semantic dedup \\
+\texttt{GEMINI\_DAILY\_REPORT\_IMAGEGEN} & 0              & Enable Imagen-3 daily visual brief \\
+\texttt{PREVIOUS\_ITEM\_DEDUP\_DAYS}     & (unset)        & Cross-issue dedup window \\
+\texttt{SHOW\_DOCKET\_CANDIDATES}        & 0              & Show uncertain candidates \\
+\texttt{COLLAPSE\_LONG\_CELLS}           & 0              & Fold long table cells \\
+\texttt{COLLAPSE\_ARTICLE\_URLS}         & 0              & Collapse article URL lists \\
+\texttt{DEBUG}                           & 0              & Verbose logging \\
+\bottomrule
+\end{tabular}%
+}
+\end{table}
+
+\section{Treatment-Edge Extraction Accuracy}
+\label{app:edge_extraction}
+
+Table~\ref{tab:edge_extraction} reports the per-relation accuracy of the treatment-edge extractor (main text) against the hand-labeled gold span set. Negative-treatment edges (\textsc{supersedes}/\textsc{overrules}/material \textsc{narrows}) drive validity-interval closure and are reported separately from the high-frequency \textsc{cites} relation, with a micro-average over the three negative-treatment relations.
+
+\begin{table}[h]
+\centering
+\caption{Treatment-edge extraction accuracy against the hand-labeled gold span set (main text).}
+\label{tab:edge_extraction}
+\small
+\setlength{\tabcolsep}{5pt}
+\resizebox{\columnwidth}{!}{%
+\begin{tabular}{l c c c}
+\toprule
+\textbf{Relation} & \textbf{Precision} & \textbf{Recall} & \textbf{F1} \\
+\midrule
+\textsc{cites}                          & 0.94 & 0.96 & 0.95 \\
+\textsc{distinguishes}                  & 0.81 & 0.76 & 0.78 \\
+\textsc{narrows} (material)             & 0.79 & 0.71 & 0.75 \\
+\textsc{supersedes}                     & 0.85 & 0.78 & 0.81 \\
+\textsc{overrules}                      & 0.88 & 0.82 & 0.85 \\
+\midrule
+\textbf{Negative-treatment (micro)}     & 0.84 & 0.77 & 0.80 \\
+\bottomrule
+\end{tabular}%
+}
+\end{table}
+
+\section{Retriever Ablation (LegalRisk-RAG)}
+\label{app:retriever}
+
+Table~\ref{tab:schema_completeness} reports schema completeness and record creation time across three conditions (unstructured baseline, manual CSV entry, and ALERT-automated CSV), corresponding to the RQ4 operational result in the main text.
+
+\begin{table}[h]
+\centering
+\caption{Schema completeness and record creation time across three conditions. Referenced from the main text (RQ4).}
+\label{tab:schema_completeness}
+\small
+\setlength{\tabcolsep}{4pt}
+\resizebox{\columnwidth}{!}{%
+\begin{tabular}{l c c c}
+\toprule
+\textbf{Condition} & \textbf{All} & \textbf{Req.} & \textbf{Time} \\
+                   & \textbf{Fields (\%)} & \textbf{Fields (\%)} & \textbf{(min)} \\
+\midrule
+Unstructured (baseline)      & 38.2 & 51.4 & 22.3 \\
+Manual CSV                   & 74.6 & 91.7 & 18.1 \\
+\textbf{ALERT-automated CSV} & \textbf{81.3} & \textbf{97.2} & \textbf{1.4} \\
+\bottomrule
+\end{tabular}%
+}
+\end{table}
+
+Table~\ref{tab:ablation} reports the component-wise ablation of the agentic loop, showing the contribution of the Goal Checker, Planner, and Retriever query-expansion to risk classification F1 and retrieval Recall@10 (RQ3 in the main text).
+
+\begin{table}[h]
+\centering
+\caption{Agentic-loop ablation: component-wise contribution to risk classification F1 and retrieval Recall@10 (mean over 5 evaluation runs). Referenced from the main text (RQ3).}
+\label{tab:ablation}
+\small
+\setlength{\tabcolsep}{4pt}
+\resizebox{\columnwidth}{!}{%
+\begin{tabular}{l c c}
+\toprule
+\textbf{Variant} & \textbf{F1} & \textbf{Recall@10} \\
+\midrule
+\textbf{ALERT (Full)}                    & \textbf{0.81} & \textbf{0.84} \\
+$-$ Goal Checker (Single-Agent)          & 0.76 & 0.84 \\
+$-$ Planner (fixed task order)           & 0.78 & 0.84 \\
+$-$ Retriever query-expansion            & 0.79 & 0.76 \\
+\bottomrule
+\end{tabular}%
+}
+\end{table}
+
+Table~\ref{tab:retriever_ablation} reports Recall@10 on a held-out development set of 200 query--document pairs for three retriever configurations. The hybrid sparse--dense model is adopted as default in all main-paper experiments.
+
+\begin{table}[h]
+\centering
+\caption{Retriever ablation. Recall@10 on the LegalRisk-RAG development set (200 query--document pairs).}
+\label{tab:retriever_ablation}
+\small
+\setlength{\tabcolsep}{4pt}
+\resizebox{\columnwidth}{!}{%
+\begin{tabular}{l c}
+\toprule
+\textbf{Retriever Configuration} & \textbf{Recall@10} \\
+\midrule
+Dense (\texttt{text-embedding-3-large})            & 0.79 \\
+LegalBERT (fine-tuned on RECAP)                    & 0.81 \\
+\textbf{Hybrid (BM25 + neural re-ranking)}         & \textbf{0.84} \\
+\bottomrule
+\end{tabular}%
+}
+\end{table}
+
+\section{Reproducibility: Hyperparameters, Prompts, Protocol}
+\label{app:repro}
+
+\subsection{Goal-Conditioned Agentic Loop (Full Procedure)}
+
+Algorithm~\ref{alg:alert_loop} gives the full ALERT agentic loop summarized in the main text.
+
+\begin{algorithm}[h]
+\caption{ALERT Goal-Conditioned Agentic Loop}
+\label{alg:alert_loop}
+\begin{algorithmic}[1]
+\REQUIRE Document corpus $\mathcal{D}$, product spec $P$, goal predicate $\mathcal{G}$, evidence threshold $(k,\tau)$, max iterations $T_{\max}$
+\ENSURE Verified risk report $R^*$, mitigation guidance $G^*$
+\STATE $R_0 \gets \emptyset$;\quad $t \gets 0$
+\WHILE{$\neg\, \mathcal{G}(R_t)\ \wedge\ t < T_{\max}$}
+  \STATE $\mathcal{T}_t \gets \textsc{Planner}(R_t, \mathcal{G}, P)$ \COMMENT{Decompose unmet sub-goals}
+  \FOR{each sub-task $\mathit{tk} \in \mathcal{T}_t$}
+    \STATE $E_{\mathit{tk}} \gets \textsc{Retriever}(\mathit{tk},\mathcal{D})$ \COMMENT{LegalRisk-RAG}
+    \IF{$|E_{\mathit{tk}}| < k\ \vee\ \min\,\mathrm{score}(E_{\mathit{tk}}) < \tau$}
+      \STATE $E_{\mathit{tk}} \gets \textsc{Retriever}(\textsc{ExpandQuery}(\mathit{tk}),\mathcal{D})$
+    \ENDIF
+    \STATE $C_{\mathit{tk}} \gets \textsc{Analyzer}(E_{\mathit{tk}}, P)$ \COMMENT{Risk score \& clustering}
+  \ENDFOR
+  \STATE $R_{t+1} \gets \textsc{Reporter}(\{C_{\mathit{tk}}\}, R_t)$
+  \IF{$\textsc{GoalChecker}(R_{t+1}) = \textsc{True}$}
+    \STATE \textbf{break}
+  \ENDIF
+  \STATE $t \gets t+1$
+\ENDWHILE
+\STATE $G^* \gets \textsc{Mitigate}(R_t, P)$ \COMMENT{Per-risk action templates}
+\STATE \textbf{return} $R^* \gets R_t,\ G^*$
+\end{algorithmic}
+\end{algorithm}
+
+\subsection{Goal Predicate and Loop Parameters}
+
+Table~\ref{tab:hyperparams} summarizes the parameters used by Algorithm~\ref{alg:alert_loop} for all reported experiments.
+
+
+\begin{table}[h]
+\centering
+\caption{ALERT goal-predicate and loop hyperparameters used throughout the evaluation.}
+\label{tab:hyperparams}
+\small
+\setlength{\tabcolsep}{4pt}
+\resizebox{\columnwidth}{!}{%
+\begin{tabular}{l c p{4.3cm}}
+\toprule
+\textbf{Parameter} & \textbf{Value} & \textbf{Description} \\
+\midrule
+$k$               & 3              & Min.\ retrieved documents per risk item \\
+$\tau$            & 0.62           & Min.\ relevance score (cosine) \\
+$T_{\max}$        & 5              & Max.\ agentic loop iterations \\
+$\theta$ (LLM)    & GPT-4o, T=0.2  & Controller policy backbone \\
+Embedding dim.    & 3072           & \texttt{text-embedding-3-large} \\
+Mapping threshold & 0.72           & Bi-encoder product--risk similarity \\
+\bottomrule
+\end{tabular}%
+}
+\end{table}
+
+\subsection{Agent Prompt Templates (Schematic)}
+
+Each of the four agents (Planner, Retriever, Analyzer, Reporter) is invoked with a structured prompt of the form:
+\begin{mycodebox}
+\small\texttt{[ROLE]: \{agent role description\}}\\
+\texttt{[INPUTS]: \{R\_t, P, sub-goal, retrieved evidence\}}\\
+\texttt{[GOAL CHECK]: \{unmet sub-conditions of G\}}\\
+\texttt{[OUTPUT FORMAT]: \{structured JSON schema\}}
+\end{mycodebox}
+Full prompt templates are released alongside the open-source implementation. The Goal Checker is implemented as deterministic rule evaluation over $R_t$ (no LLM call), making termination decisions auditable.
+
+\subsection{Evaluation Protocol Notes}
+
+\textbf{Dataset split.} The 70/10/20 train/validation/test split is stratified by year and litigation type and held fixed across all baselines (B1--B5 and ALERT (Full)). The 5 random seeds vary only the test-fold sub-sample within the held-out 20\% partition.
+
+\textbf{Likert evaluation.} Two legal specialists, blind to system identity, rated 75 reports (15 per condition) on a 5-point scale across five dimensions. Reports were presented in randomized order; system identifiers were stripped.
+
+\textbf{Statistical tests.} F1 differences in Table~\ref{tab:rq1} are evaluated by a paired bootstrap test ($10{,}000$ resamples). Likert differences in RQ2 use the Wilcoxon signed-rank test on per-report mean ratings.
+
+\section{Proof of Proposition~\ref{prop:termination} and Calibration Protocol}
+\label{app:theory}
+
+Table~\ref{tab:human_only} reports risk classification on the human-adjudicated subset only ($n{=}400$), serving as the primary circularity check by excluding retained pre-labels (RQ1 in the main text).
+Table~\ref{tab:risk_control_temporal} reports evidence-omission risk under random and temporal calibration splits, confirming that calibrated thresholds meet the specified budget $\alpha$ while showing that exchangeability is stressed under temporal shift (RQ6).
+Table~\ref{tab:robustness} confirms that the accuracy ordering is preserved when the GPT-4o backbone is replaced by an open-weights stack, indicating that gains stem from the goal predicate and temporal graph rather than a single proprietary model.
+
+% Tables A.7/A.8/A.9 are grouped in one float so LaTeX places them
+% sequentially at the top of the column ([t!]).
+\begin{table}[t!]
+\centering
+% --- A.7 ---
+\caption{Risk classification on the \textbf{human-adjudicated subset only} ($n{=}400$), isolating any optimism from auto-retained pre-labels (RQ1).}
+\label{tab:human_only}
+\small
+\setlength{\tabcolsep}{4pt}
+\resizebox{\columnwidth}{!}{%
+\begin{tabular}{lccc}
+\toprule
+\textbf{System} & \textbf{F1} & \textbf{Precision} & \textbf{Recall} \\
+\midrule
+B1 (Rule-Based)       & $0.55 \pm 0.03$ & $0.52 \pm 0.04$ & $0.59 \pm 0.04$ \\
+B2 (Single-Pass LLM)  & $0.70 \pm 0.03$ & $0.72 \pm 0.03$ & $0.68 \pm 0.03$ \\
+B3 (RAG-only)         & $0.72 \pm 0.03$ & $0.73 \pm 0.03$ & $0.71 \pm 0.03$ \\
+B4 (Single-Agent)     & $0.74 \pm 0.02$ & $0.75 \pm 0.03$ & $0.73 \pm 0.03$ \\
+B5 (Self-Refinement)  & $0.75 \pm 0.02$ & $0.76 \pm 0.03$ & $0.74 \pm 0.03$ \\
+\textbf{ALERT (Full)} & $\mathbf{0.79 \pm 0.02}$ & $\mathbf{0.80 \pm 0.02}$ & $\mathbf{0.78 \pm 0.03}$ \\
+\bottomrule
+\end{tabular}%
+}
+
+\vspace{8pt}
+
+% --- A.8 ---
+\caption{Evidence-omission risk under random and temporal calibration splits. Lower is better; values should be read as evidence-coverage risk, not severity-label correctness.}
+\label{tab:risk_control_temporal}
+\small
+\setlength{\tabcolsep}{4pt}
+\begin{tabular}{lccc}
+\toprule
+\textbf{Split} & $\alpha=0.05$ & $\alpha=0.10$ & $\alpha=0.20$ \\
+\midrule
+Random resplits & 0.043 & 0.082 & 0.171 \\
+Temporal 2023--24 $\rightarrow$ 2025 & 0.061 & 0.113 & 0.196 \\
+\bottomrule
+\end{tabular}
+
+\vspace{8pt}
+
+% --- A.9 ---
+\caption{Robustness to model choice and run-to-run variance (full-system re-execution).}
+\label{tab:robustness}
+\small
+\setlength{\tabcolsep}{5pt}
+\resizebox{\columnwidth}{!}{%
+\begin{tabular}{lcc}
+\toprule
+\textbf{Configuration} & \textbf{Macro F1} & \textbf{Mean iters} \\
+\midrule
+GPT-4o + \texttt{text-embedding-3-large} & $0.81\pm0.02$ & $2.4\pm0.3$ \\
+Llama-3.1-70B + \texttt{bge-large}        & $0.76\pm0.02$ & $2.6\pm0.3$ \\
+\bottomrule
+\end{tabular}%
+}
+\end{table}
+
+\subsection{Termination Property (Proof)}
+Let $\Phi(R_t)\in\mathbb{Z}_{\geq 0}$ count the unmet atomic sub-conditions of $\mathcal{G}$ (one per missing severity label, per under-supported evidence requirement, and per missing mitigation) over the risk items in $R_t$.
+By assumption (A1) \emph{monotone retrieval}, the evidence set attached to any item is non-decreasing across iterations, so a sub-condition once satisfied by $\mathcal{G}_{\text{evidence}}$ or $\mathcal{G}_{\text{guide}}$ remains satisfied; hence no satisfied atom can become unmet and $\Phi(R_{t+1})\leq\Phi(R_t)$.
+By assumption (A2) \emph{attainable progress}, whenever $\Phi(R_t)>0$ and at least one unmet atom is \emph{attainable} (the required evidence exists in $\mathcal{D}$), the Planner schedules it and the Retriever/Analyzer resolves it, giving $\Phi(R_{t+1})\leq\Phi(R_t)-1$.
+Therefore, if every atom is attainable, $\Phi$ strictly decreases each iteration until $\Phi=0$, i.e.\ $\mathcal{G}=\textsc{True}$, in at most $\Phi(R_0)$ steps. If some atom is unattainable, $\Phi$ cannot reach $0$; the loop runs to $T_{\max}$ and the Goal Checker reports the residual $\Phi(R_{T_{\max}})$ unmet atoms, which are exactly the items requiring human escalation. \hfill$\square$
+
+\noindent\textit{Remark.} (A1) holds by construction because \texttt{EXPANDQUERY} unions new hits with the prior evidence cache; (A2) is the design assumption that one tractable sub-goal is closed per pass, validated empirically by the mean iteration count (RQ3).
+
+\subsection{Conformal Risk-Controlled Termination}
+We calibrate the evidence threshold $\tau$ (and, jointly, $k$) so that termination meets a user-specified omission-risk budget $\alpha$.
+Let the bounded loss $L_i(\tau)=\mathbf{1}[\text{a true High-risk theory is omitted from }R^*(c_i)]$ on calibration case $c_i$, $i=1,\dots,n$, and $\hat R_n(\tau)=\frac1n\sum_i L_i(\tau)$, which is non-increasing as $\tau$ decreases (more evidence admitted).
+Following conformal risk control~\citep{angelopoulos2023conformalrisk}, choosing
+$\hat\tau=\inf\{\tau:\tfrac{n}{n+1}\hat R_n(\tau)+\tfrac{1}{n+1}\le\alpha\}$
+controls $\mathbb{E}[L_{n+1}(\hat\tau)]\le\alpha$ for an exchangeable test case under the calibration assumptions.
+For the joint $(k,\tau)$ we use a Learn-then-Test grid~\citep{angelopoulos2021ltt}, treating each configuration as a hypothesis and controlling the family-wise error via fixed-sequence testing.
+The achieved-vs-target risk and the induced risk--cost curve are reported in RQ6.
+
+\subsection{Temporal-Split Evidence-Coverage Audit}
+\label{app:risk_control}
+Table~\ref{tab:risk_control_temporal} separates the standard random calibration/test split from a stricter temporal split. The temporal split does not invalidate the calibrated procedure; it shows that the exchangeability assumption is empirically stressed by evolving litigation streams and motivates rolling or weighted calibration in deployment.
+
+
+
+\section{Pre-Registered Validation Protocols}
+\label{app:protocols}
+
+The two construct-validity steps flagged in the Discussion---transfer of the validity-gating modifier to an external retrieval stack, and agreement of the automatically extracted treatment graph with an authoritative citator---are specified here as \emph{pre-registered protocols}. Protocol~P1 (external-stack transfer) is reported as a protocol only and is not yet executed; Protocol~P2 (citator agreement) has been executed and its measured results are reported in Appendix~\ref{app:p2}. The protocols fix the datasets, conditions, metrics, statistical tests, and acceptance criteria \emph{before} execution so that the outcome cannot be tuned post hoc. Both protocols are designed to be runnable on public resources plus a single licensed citator account, and both release their analysis scripts, query/seed manifests, and (for the citator study) the category crosswalk rather than any redistributed proprietary content.
+
+\subsection{Protocol P1: External-Stack Transfer of the Validity-Gating Modifier}
+\label{app:p1}
+
+\textbf{Hypothesis.} The supersession-aware score of Eq.~\eqref{eq:tpg_score}---a base similarity multiplied by a time-validity indicator $\mathbf{1}[s_v\!\le\! t_q\!<\! e_v]$ and a treatment weight $w(\mathrm{treat}(\cdot))$---improves \emph{external} legal retrievers that do not use ALERT's agentic loop, dataset, or goal predicate, confirming the mechanism transfers rather than being ALERT-specific.
+
+\textbf{Host retrievers (unmodified, external).} (i)~BM25; (ii)~a general dense retriever (\texttt{text-embedding-3-large} or an open \texttt{bge}/\texttt{e5} encoder); (iii)~a legal encoder (LegalBERT). Each is the ``host'' stack; the modifier is applied only as a post-hoc re-scoring layer ($\mathrm{score}'=\mathrm{score}_{\text{host}}\cdot\mathbf{1}[\cdot]\cdot w(\cdot)$), with \emph{no} re-indexing and \emph{no} ALERT loop.
+
+\textbf{Evaluation corpora (disjoint from ALERT-Dataset).} (a)~a COLIEE-style public case-retrieval benchmark; and (b)~a temporally held-out CourtListener slice whose jurisdiction/time window does not overlap the ALERT-Dataset window. Setting~(b) is the decisive transfer test because it contains time-varying authority outside ALERT's training window.
+
+\textbf{Conditions.} For each host retriever: \{ungated baseline\} vs.\ \{+ indicator only\} vs.\ \{+ indicator and treatment weight\}, mirroring the decomposition of Table~\ref{tab:temporal_ablation}. Each query carries a query date $t_q$; an authority closed before $t_q$ is treated as stale (non-relevant) in the gold judgments.
+
+\textbf{Treatment-label source (confound control).} To avoid inheriting ALERT's extractor noise, the external test uses treatment labels from a source independent of ALERT's extractor (gold/citator-derived). We report two variants per condition---\emph{gold-treatment} and \emph{extractor-treatment}---so the transfer claim is separated from extraction quality.
+
+\textbf{Metrics.} Retrieval quality (nDCG@10, Recall@10, MRR) and a \emph{stale-citation rate} (fraction of top-$k$ closed before $t_q$). The primary endpoints are the paired deltas (gated $-$ ungated) per host retriever.
+
+\textbf{Statistics.} Paired bootstrap over queries ($10{,}000$ resamples) with $95\%$ CIs on each delta; Holm correction across the three host retrievers; a pre-specified non-inferiority margin ($\delta_{\text{NI}}=0.5$ nDCG points) requiring the modifier not to hurt on queries with no negative-treatment in scope.
+
+\textbf{Acceptance criterion (pre-registered).} P1 succeeds iff the modifier yields a positive nDCG@10 delta \emph{and} a reduced stale-citation rate on at least two of three host retrievers, the effect persists on the temporally held-out slice~(b), and non-inferiority holds on the no-stale subset. Failure on slice~(b) but success on~(a) is reported as ``in-distribution only,'' which would \emph{not} support the transfer claim.
+
+\subsection{Protocol P2: Citator Agreement for the Treatment Graph}
+\label{app:p2}
+
+\textbf{Objective.} Replace ``validated against our own gold spans'' with ``validated against an authoritative citator'' for the negative-treatment edges (\textsc{supersedes}, \textsc{overrules}, material \textsc{narrows}) that drive interval closure.
+
+\textbf{Sampling frame and power.} A stratified random sample of edges from the current graph ($1{,}812$ nodes, $4{,}760$ edges), stratified by relation type and polarity and oversampling negative-treatment edges. Target $n\!=\!400$ edges with $\ge\!150$ negative-treatment edges; this supports a $95\%$ CI half-width of $\le\!0.07$ on Cohen's $\kappa$ at an anticipated $\kappa\!\approx\!0.75$. The exact draw is fixed by a released seed before any citator lookup.
+
+\textbf{Reference standard.} For each sampled (citing $\rightarrow$ cited) pair and date, retrieve the citator treatment signal (e.g., KeyCite/Shepard's negative, cautionary, or positive flags) and map it to ALERT's relation/polarity taxonomy through a \emph{pre-specified, published crosswalk}. Two annotators perform this mapping independently and blind to ALERT's predicted edge; a third adjudicates disagreements. Inter-annotator agreement on the citator mapping itself is reported (Cohen's $\kappa$).
+
+\textbf{Primary endpoints.}
+\begin{itemize}[leftmargin=1.2em,itemsep=1pt,topsep=2pt]
+  \item \emph{Edge agreement}: precision/recall/F1 of ALERT edges vs.\ citator-derived edges, per relation and micro-averaged over negative treatment.
+  \item \emph{Interval-closure agreement}: whether ALERT closes an interval no later than the citator's negative-treatment date; the closure-date error distribution (in days); and the rates of \emph{missed closures} (citator negative, ALERT open) and \emph{false closures} (ALERT closed, citator still good).
+  \item \emph{Point-in-time correctness}: validity intervals are checked at multiple historical dates, not only the latest status, because citators are themselves time-varying.
+\end{itemize}
+
+\textbf{Downstream link.} On the disagreement subset, the PLRE/stale-cite audit is re-run with citator-corrected closures to measure the \emph{decision-flip rate}, connecting construct validity to risk-decision outcomes.
+
+\textbf{Acceptance criterion (pre-registered).} P2 succeeds iff negative-treatment micro-F1 vs.\ the citator $\ge\!0.80$ and the missed-closure rate is at or below the audited tolerance used in Table~\ref{tab:edge_sensitivity}; relation types failing the bar are routed to the human review queue and the residual is reported rather than suppressed.
+
+\textbf{Licensing and ethics.} Citator outputs are proprietary and are used solely as an evaluation reference under a licensed account. The release contains the crosswalk, sampling seeds, and agreement statistics, but no redistributed citator content, consistent with the data-governance boundary in the main text.
+
+\textbf{Measured P2 results.} The audit sampled $n\!=\!400$ treatment candidates, including 162 negative-treatment candidates. Inter-annotator agreement on the citator-to-ALERT crosswalk was substantial ($\kappa=0.78$). Edge-level agreement was measured against the citator-derived reference, and interval-closure behavior plus downstream impact were reported. Negative-treatment micro-F1 is 0.81 and the missed-closure rate is 20.4\%, satisfying the pre-specified P2 threshold and staying below the 23\% missed-closure tolerance used in the edge-sensitivity table (Table~\ref{tab:edge_sensitivity}). Material \textsc{narrows} remains the weakest relation and is retained in the human-review queue. Edge-level agreement is reported in Table~\ref{tab:p2_edge}; interval-closure agreement and downstream decision impact are reported in Table~\ref{tab:p2_closure}.
+
+\begin{table}[t]
+\centering
+\caption{Measured P2 edge agreement: ALERT treatment edges vs.\ the authoritative citator-derived reference. Micro-average is over the three negative-treatment relations.}
+\label{tab:p2_edge}
+\small
+\setlength{\tabcolsep}{4pt}
+\resizebox{\columnwidth}{!}{%
+\begin{tabular}{l c c c c}
+\toprule
+\textbf{Relation} & \textbf{$n$} & \textbf{Precision} & \textbf{Recall} & \textbf{F1} \\
+\midrule
+\textsc{overrules}                  & 54  & 0.86 & 0.82 & 0.84 \\
+\textsc{supersedes}                 & 47  & 0.82 & 0.79 & 0.80 \\
+material \textsc{narrows}           & 61  & 0.79 & 0.76 & 0.77 \\
+\textbf{Negative-treatment (micro)} & 162 & \textbf{0.83} & \textbf{0.80} & \textbf{0.81} \\
+Cautionary treatment                & 78  & 0.81 & 0.74 & 0.77 \\
+Positive/neutral citation           & 160 & 0.93 & 0.95 & 0.94 \\
+\bottomrule
+\end{tabular}%
+}
+\end{table}
+
+\begin{table}[t]
+\centering
+\caption{Measured P2 closure agreement and downstream decision impact against the citator-derived reference.}
+\label{tab:p2_closure}
+\small
+\setlength{\tabcolsep}{4pt}
+\resizebox{\columnwidth}{!}{%
+\begin{tabular}{l c}
+\toprule
+\textbf{Metric} & \textbf{Value} \\
+\midrule
+Matched negative closures                          & 129 / 162 \\
+Missed-closure rate                                & 20.4\% \\
+False-closure rate                                 & 4.8\% \\
+Median closure-date error                          & 18 days \\
+Mean closure-date error                            & 31 days \\
+90th-percentile closure-date error                 & 74 days \\
+Point-in-time validity accuracy                    & 0.88 \\
+PLRE decision-flip rate after citator correction   & 3.8\% \\
+\bottomrule
+\end{tabular}%
+}
+\end{table}

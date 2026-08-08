@@ -1,0 +1,30 @@
+\section{Problem Formulation}
+\label{sec:formulation}
+
+Let $\mathcal{D}=\{d_1,\ldots,d_n\}$ be public litigation documents with metadata and text, and let $P$ be a product specification describing architecture, data provenance, modality, and deployment context. ALERT returns a structured report $R^*$ and mitigation candidates $G^*$:
+\begin{equation}
+  R^* = \arg\max_{R\in\mathcal{R}} \text{Quality}(R,\mathcal{D},P)
+  \quad\text{s.t.}\quad \mathcal{G}(R)=\textsc{True}.
+\end{equation}
+Quality is operationalized in evaluation, not optimized as one loss: correctness/completeness by severity-label F1 (RQ1), actionability/clarity by blinded report ratings (RQ2), and evidence sufficiency by the coverage loss $L_\tau$ (RQ6); $\mathcal{G}$ is the auditable goal predicate below. The hard case is a domain gap: product specs use engineering terms such as data pipelines and API distribution, while litigation documents use causes of action, procedural posture, and precedent. PLRE therefore tests a context-aware entailment problem: map engineering-language attributes to legal-risk theories while conditioning the support set on authority valid at the query date. Operational integrations establish deployability; the AI contribution is the retrieval-and-entailment mechanism, not the surrounding monitoring workflow.
+
+\subsection{Goal-Conditioned Agentic Loop}
+\label{sec:goal_checker}
+
+ALERT treats report generation as goal-conditioned planning. The predicate is:
+\begin{equation}
+\label{eq:goal_predicate}
+  \mathcal{G}(R)=\mathcal{G}_{\text{risk}}(R)\wedge\mathcal{G}_{\text{evidence}}(R)\wedge\mathcal{G}_{\text{guide}}(R),
+\end{equation}
+where $\mathcal{G}_{\text{risk}}$ requires every risk item to have a severity label, $\mathcal{G}_{\text{evidence}}$ requires at least $k$ supporting documents above relevance threshold $\tau$, and $\mathcal{G}_{\text{guide}}$ requires mitigation text for each High or Medium item. The controller chooses among \textsc{Search}, \textsc{Analyze}, \textsc{Summarize}, \textsc{Map}, \textsc{Verify}, and \textsc{Report}; the deterministic Goal Checker either terminates, emits a structured critique to close residual gaps, or escalates unmet conditions. For example, if a High-risk item has only one valid authority after gating, the critique records the missing theory, product attribute, jurisdiction, query date, and required evidence count; the Planner rewrites this into narrower precedent and entity queries rather than simply retrying the same prompt.
+
+Let $\Phi(R_t)$ count the unmet atomic sub-conditions of $\mathcal{G}$ and let $L_\tau(c)=\mathbf{1}[\text{a retrievable High-risk theory in case }c\text{ is omitted from }R^*]$ be the coverage loss at evidence threshold $\tau$.
+\begin{proposition}[Coverage-controlled stopping with escalation]
+\label{prop:termination}
+Under monotone evidence caching and attainable progress, $\Phi(R_t)$ is non-increasing, reaches zero in at most $\Phi(R_0)$ successful progress steps when all atoms are attainable, and otherwise returns the residual atoms at $T_{\max}$. If $\hat\tau$ is selected on exchangeable calibration cases by conformal risk control, then the next-case omission risk satisfies $\mathbb{E}[L_{\hat\tau}]\le\alpha$.
+\end{proposition}
+The first clause is only a bounded stopping-and-escalation guarantee; the second clause is the statistical risk-control mechanism that makes the loop useful for AI evaluation. It controls evidence coverage under the calibration distribution, not severity-label correctness, legal advice, or future temporal shift.
+
+\subsection{Risk Scoring}
+
+The agentic layer scores risk as $\text{RiskScore}(d_i,P,C)=f_\theta(\phi(d_i),\psi(P),\chi(C))$, where $C$ is precedent context retrieved by LegalRisk-RAG. The ingestion layer uses an additive scoring matrix (Table~\ref{tab:risk_matrix}, appendix) for real-time triage, with a critical-composite bonus when copyright and model-training evidence co-occur; this heuristic is treated as a baseline and never as ground truth.
