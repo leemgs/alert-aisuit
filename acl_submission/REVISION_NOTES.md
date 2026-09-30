@@ -58,9 +58,12 @@ A compiled `main.pdf` is included for convenience.
    ("+ mask x% of extracted"), an approximate effective-miss-rate column added
    (1 − 0.77·(1 − x)), caption and RQ3 text rewritten, and the P2 appendix wording
    aligned (23% = extractor's own miss rate, not a masking level). No numbers changed.
-2. **Backbone robustness.** The text claims the baseline ranking is preserved with
-   Llama-3.1-70B + bge, but Table A (robustness) shows only ALERT. Add at least B3/B5
-   under the open-weights stack, or soften the claim.
+2. ~~Backbone robustness~~ — **resolved by softening.** Authors confirmed baselines
+   were not run on the Llama-3.1-70B + bge stack. The claim that the baseline ranking is
+   preserved was removed from RQ6, Limitations, and the appendix; the text now states only
+   what Table (robustness) shows (full system F1 0.81→0.76, 2.4→2.6 iterations), and
+   Limitations names backbone-matched baseline comparisons as an open test. If baseline
+   runs on the open-weights stack become available, add them to that table.
 3. **Protocol P1** (external-stack transfer) is still unexecuted; it remains the most
    likely reviewer objection to the "generality" claim.
 4. **Responsible NLP checklist** (portal): you will need annotator/rater recruitment,

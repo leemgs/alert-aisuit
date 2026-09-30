@@ -375,7 +375,7 @@ Full prompt templates are released alongside the open-source implementation. The
 \label{app:theory}
 
 Table~\ref{tab:risk_control_temporal} reports evidence-omission risk under random and temporal calibration splits: calibrated thresholds meet the budget $\alpha$ on random splits, while the temporal split exceeds it at $\alpha\in\{0.05,0.10\}$, showing that exchangeability is stressed under temporal shift (RQ6).
-Table~\ref{tab:robustness} reports full-system macro F1 and mean loop iterations when the GPT-4o backbone is replaced by an open-weights stack.
+Table~\ref{tab:robustness} reports full-system macro F1 and mean loop iterations when the GPT-4o backbone is replaced by an open-weights stack. Only ALERT was re-run on the open-weights stack; baselines were not, so the table does not support cross-backbone comparisons with the baselines.
 
 % The two tables below are grouped in one float so LaTeX places them
 % sequentially at the top of the column ([t!]).
@@ -398,7 +398,7 @@ Temporal 2023--24 $\rightarrow$ 2025 & 0.061 & 0.113 & 0.196 \\
 
 \vspace{8pt}
 
-\caption{Robustness to model choice and run-to-run variance (full-system re-execution).}
+\caption{Full ALERT system under two backbones (mean $\pm$ std over runs). Baselines were not re-run on the open-weights stack.}
 \label{tab:robustness}
 \small
 \setlength{\tabcolsep}{5pt}
