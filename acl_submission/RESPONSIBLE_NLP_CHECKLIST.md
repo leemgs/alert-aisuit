@@ -58,6 +58,6 @@ Three legal research specialists adjudicated labels (§5.2); two specialists rat
 
 All items have draft answers. Remaining actions:
 
-1. The released code must include a pinned dependency file (e.g. `requirements.txt`), since C4 points to it.
+1. The released code must include a pinned dependency file, since C4 points to it. Run `code_release/pin_requirements.py` in the experiment environment and ship the generated `requirements.lock.txt` (see `code_release/README.md`).
 2. Confirm that the dataset card states CC BY 4.0 and the code repository states MIT (B2).
 3. Copy the answers into the ARR form and check the item IDs against the current form.
