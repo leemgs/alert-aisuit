@@ -12,16 +12,16 @@
 
 \section*{Technical Appendix}
 
-This appendix supplements the main text with material that supports reproducibility but exceeds the page budget of the body. It contains the full 22-field schema, the ingestion-layer scoring matrix, formatted \texttt{History}/\texttt{Progress Notes} examples, open-source implementation details and configuration parameters of \texttt{ai-suit-tracker}, treatment-edge extraction accuracy, full-test-set RQ1 results and the schema-completeness/agentic-loop/retriever ablations, goal-predicate hyperparameters with agent prompt templates and evaluation-protocol notes, and the proof of Proposition~\ref{prop:termination} with the conformal calibration and temporal-shift audit.
+This appendix supplements the main text with material that supports reproducibility but exceeds the page budget of the body. It contains the full 22-field schema, the ingestion-layer scoring matrix, formatted \texttt{History}/\texttt{Progress Notes} examples, open-source implementation details and configuration parameters of \trackername{}, treatment-edge extraction accuracy, full-test-set RQ1 results and the schema-completeness/agentic-loop/retriever ablations, goal-predicate hyperparameters with agent prompt templates and evaluation-protocol notes, and the proof of Proposition~\ref{prop:termination} with the conformal calibration and temporal-shift audit.
 
-\section{Full \texttt{ai-suit-sensing.csv} Schema}
+\section{Full \schemafile{} Schema}
 \label{app:full_schema}
 
-Table~\ref{tab:full_schema} lists all 22 fields of \texttt{ai-suit-sensing.csv}, with type, requirement level (R\,=\,Required, Rec\,=\,Recommended, O\,=\,Optional), and description.
+Table~\ref{tab:full_schema} lists all 22 fields of \schemafile{}, with type, requirement level (R\,=\,Required, Rec\,=\,Recommended, O\,=\,Optional), and description.
 
 \begin{table}[h]
 \centering
-\caption{The full 22-field \texttt{ai-suit-sensing.csv} schema.}
+\caption{The full 22-field \schemafile{} schema.}
 \label{tab:full_schema}
 \scriptsize
 \setlength{\tabcolsep}{3.5pt}
@@ -107,15 +107,15 @@ The \texttt{Progress Notes} field (field~20) uses Markdown \texttt{\#\#} headers
 \section{Open-Source Implementation Details}
 \label{app:impl}
 
-The \texttt{ai-suit-tracker} tool runs on an adaptive, configurable GitHub Actions schedule: hourly during a configurable business-hours window and two-hourly off-hours. On-demand execution via \texttt{workflow\_dispatch} is also supported. Its principal modules are:
+The \trackername{} tool runs on an adaptive, configurable GitHub Actions schedule: hourly during a configurable business-hours window and two-hourly off-hours. On-demand execution via \texttt{workflow\_dispatch} is also supported. Its principal modules are:
 
 \begin{itemize}
-  \item \textbf{Query engine} (\texttt{src/queries.py}): five \texttt{COURTLISTENER\_QUERIES} (complaint/petition filters with AI keywords, CourtListener REST API v4) plus four \texttt{NEWS\_QUERIES} for Google News RSS.
-  \item \textbf{Ingestion pipeline} (\texttt{src/run.py}): orchestrates polling, RSS monitoring, docket backtracking, and cross-issue deduplication using \texttt{PREVIOUS\_ITEM\_DEDUP\_DAYS}.
-  \item \textbf{Complaint parser} (\texttt{src/complaint\_parse.py}, \texttt{src/pdf\_text.py}): extracts cause-of-action language, training snippets, and parties from RECAP PDFs.
-  \item \textbf{Risk scorer} (\texttt{src/render.py}): applies the seven-category additive matrix \emph{plus} the critical-composite (+50) co-occurrence rule of Table~\ref{tab:risk_matrix} to produce a 0--100 score with a four-band severity indicator.
-  \item \textbf{Hybrid deduplication} (\texttt{src/dedup.py}): a two-stage pipeline (Algorithm~\ref{alg:hybrid_dedup}) that combines lexical title/docket matching with optional semantic similarity using Gemini \texttt{text-embedding-004} embeddings (cosine threshold \texttt{SEMANTIC\_DEDUP\_THRESHOLD}=0.85). Activation is gated by the \texttt{GEMINI\_SEMANTIC\_DEDUP} flag.
-  \item \textbf{Multi-modal reporting} (\texttt{src/gemini.py}, \texttt{src/trend.py}): a Gemini Flash trend summary at $\approx$1--3 calls per run, plus an optional Imagen-3 visual brief (\texttt{GEMINI\_DAILY\_REPORT\_IMAGEGEN}) attached to the day-close summary. A provider-agnostic interface accommodates alternative LLM/diffusion back-ends.
+  \item \textbf{Query engine}: five CourtListener queries (complaint/petition filters with AI keywords, REST API v4) plus four news queries over Google News RSS.
+  \item \textbf{Ingestion pipeline}: orchestrates polling, RSS monitoring, docket backtracking, and cross-issue deduplication over a configurable window.
+  \item \textbf{Complaint parser}: extracts cause-of-action language, training snippets, and parties from RECAP PDFs.
+  \item \textbf{Risk scorer}: applies the seven-category additive matrix \emph{plus} the critical-composite (+50) co-occurrence rule of Table~\ref{tab:risk_matrix} to produce a 0--100 score with a four-band severity indicator.
+  \item \textbf{Hybrid deduplication}: a two-stage pipeline (Algorithm~\ref{alg:hybrid_dedup}) that combines lexical title/docket matching with optional semantic similarity using Gemini \texttt{text-embedding-004} embeddings (cosine threshold 0.85), enabled by a configuration flag.
+  \item \textbf{Multi-modal reporting}: a Gemini Flash trend summary at $\approx$1--3 calls per run, plus an optional Imagen-3 visual brief attached to the day-close summary. A provider-agnostic interface accommodates alternative LLM/diffusion back-ends.
   \item \textbf{Reporting integrations}: posts to GitHub Issues with a three-tier hierarchical structure (issue body / morning trend summary / evening deduplicated table) and a parallel Slack notification.
 \end{itemize}
 
@@ -138,11 +138,11 @@ The \texttt{ai-suit-tracker} tool runs on an adaptive, configurable GitHub Actio
 \end{algorithmic}
 \end{algorithm}
 
-Table~\ref{tab:impl_config} lists the key configuration parameters of \texttt{ai-suit-tracker} (v02), covering API credentials, scheduling, deduplication, and reporting options. All secrets are injected via GitHub Secrets; environment variables are set via GitHub Variables.
+Table~\ref{tab:impl_config} lists the key configuration parameters of \trackername{}, covering API credentials, scheduling, deduplication, and reporting options. All secrets are injected via GitHub Secrets; environment variables are set via GitHub Variables.
 
 \begin{table}[h]
 \centering
-\caption{Key configuration parameters of \texttt{ai-suit-tracker} (v02). Secrets via GitHub Secrets; variables via GitHub Variables.}
+\caption{Key configuration parameters of \trackername{} (identifiers anonymized for review). Secrets via GitHub Secrets; variables via GitHub Variables.}
 \label{tab:impl_config}
 \scriptsize
 \setlength{\tabcolsep}{3pt}
@@ -151,21 +151,21 @@ Table~\ref{tab:impl_config} lists the key configuration parameters of \texttt{ai
 \toprule
 \textbf{Parameter} & \textbf{Default} & \textbf{Description} \\
 \midrule
-\texttt{LOOKBACK\_DAYS}                  & 3              & Days of history to retrieve \\
-\texttt{COURTLISTENER\_TOKEN}            & ---            & CourtListener API v4 token \\
-\texttt{ISSUE\_TITLE\_BASE}              & ---            & Base title for GitHub Issues \\
-\texttt{ISSUE\_LABEL}                    & \texttt{aisuit} & GitHub Issue label \\
-\texttt{GEMINI\_API\_KEY}                & ---            & LLM API key (optional) \\
-\texttt{GEMINI\_MODEL}                   & \texttt{gemini-flash-latest} & Gemini model id \\
-\texttt{GEMINI\_AISUIT\_TREND\_DAYS}     & (unset)        & Trend window (days) \\
-\texttt{GEMINI\_SEMANTIC\_DEDUP}         & 0              & Enable semantic dedup (stage~2) \\
-\texttt{SEMANTIC\_DEDUP\_THRESHOLD}      & 0.85           & Cosine threshold for semantic dedup \\
-\texttt{GEMINI\_DAILY\_REPORT\_IMAGEGEN} & 0              & Enable Imagen-3 daily visual brief \\
-\texttt{PREVIOUS\_ITEM\_DEDUP\_DAYS}     & (unset)        & Cross-issue dedup window \\
-\texttt{SHOW\_DOCKET\_CANDIDATES}        & 0              & Show uncertain candidates \\
-\texttt{COLLAPSE\_LONG\_CELLS}           & 0              & Fold long table cells \\
-\texttt{COLLAPSE\_ARTICLE\_URLS}         & 0              & Collapse article URL lists \\
-\texttt{DEBUG}                           & 0              & Verbose logging \\
+Lookback window          & 3 days         & Days of history to retrieve \\
+CourtListener token      & ---            & CourtListener API v4 token \\
+Issue title base         & ---            & Base title for GitHub Issues \\
+Issue label              & (project label) & GitHub Issue label \\
+LLM API key              & ---            & LLM API key (optional) \\
+LLM model                & \texttt{gemini-flash-latest} & Gemini model id \\
+Trend window             & (unset)        & Trend-summary window (days) \\
+Semantic dedup           & off            & Enable semantic dedup (stage~2) \\
+Semantic dedup threshold & 0.85           & Cosine threshold for semantic dedup \\
+Daily visual brief       & off            & Enable Imagen-3 daily visual brief \\
+Cross-issue dedup window & (unset)        & Cross-issue dedup window (days) \\
+Show docket candidates   & off            & Show uncertain candidates \\
+Collapse long cells      & off            & Fold long table cells \\
+Collapse article URLs    & off            & Collapse article URL lists \\
+Debug                    & off            & Verbose logging \\
 \bottomrule
 \end{tabular}%
 }
