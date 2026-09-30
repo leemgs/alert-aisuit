@@ -437,15 +437,15 @@ Table~\ref{tab:risk_control_temporal} separates the standard random calibration/
 
 
 
-\section{Pre-Registered Validation Protocols}
+\section{Pre-Specified Validation Protocols}
 \label{app:protocols}
 
-The two construct-validity steps flagged in the Discussion---transfer of the validity-gating modifier to an external retrieval stack, and agreement of the automatically extracted treatment graph with an authoritative citator---are specified here as \emph{pre-registered protocols}. Protocol~P1 (external-stack transfer) is reported as a protocol only and is not yet executed; Protocol~P2 (citator agreement) has been executed and its measured results are reported in Appendix~\ref{app:p2}. The protocols fix the datasets, conditions, metrics, statistical tests, and acceptance criteria \emph{before} execution so that the outcome cannot be tuned post hoc. Both protocols are designed to be runnable on public resources plus a single licensed citator account, and both release their analysis scripts, query/seed manifests, and (for the citator study) the category crosswalk rather than any redistributed proprietary content.
+The two construct-validity steps flagged in the Discussion---transfer of the validity-gating modifier to an external retrieval stack, and agreement of the automatically extracted treatment graph with an authoritative citator---are specified here as \emph{pre-specified protocols}. Protocol~P1 (external-stack transfer) is reported as a protocol only and is not yet executed; Protocol~P2 (citator agreement) has been executed and its measured results are reported in Appendix~\ref{app:p2}. The protocols fix the datasets, conditions, metrics, statistical tests, and acceptance criteria \emph{before} execution so that the outcome cannot be tuned post hoc. Both protocols are designed to be runnable on public resources plus a single licensed citator account, and both release their analysis scripts, query/seed manifests, and (for the citator study) the category crosswalk rather than any redistributed proprietary content.
 
 \subsection{Protocol P1: External-Stack Transfer of the Validity-Gating Modifier}
 \label{app:p1}
 
-\textbf{Hypothesis.} The supersession-aware score of Eq.~\eqref{eq:tpg_score}---a base similarity multiplied by a time-validity indicator $\mathbf{1}[s_v\!\le\! t_q\!<\! e_v]$ and a treatment weight $w(\mathrm{treat}(\cdot))$---improves \emph{external} legal retrievers that do not use ALERT's agentic loop, dataset, or goal predicate, confirming the mechanism transfers rather than being ALERT-specific.
+\textbf{Hypothesis.} The supersession-aware score of Eq.~\eqref{eq:tpg_score}---a base similarity multiplied by a time-validity indicator $\mathbf{1}[s_v\!\le\! t_q\!<\! e_v]$ and a treatment weight $w(\mathrm{treat}(\cdot))$---improves \emph{external} legal retrievers that do not use ALERT's agentic loop, dataset, or goal predicate, which would indicate that the mechanism transfers rather than being ALERT-specific.
 
 \textbf{Host retrievers (unmodified, external).} (i)~BM25; (ii)~a general dense retriever (\texttt{text-embedding-3-large} or an open \texttt{bge}/\texttt{e5} encoder); (iii)~a legal encoder (LegalBERT). Each is the ``host'' stack; the modifier is applied only as a post-hoc re-scoring layer ($\mathrm{score}'=\mathrm{score}_{\text{host}}\cdot\mathbf{1}[\cdot]\cdot w(\cdot)$), with \emph{no} re-indexing and \emph{no} ALERT loop.
 
@@ -459,7 +459,7 @@ The two construct-validity steps flagged in the Discussion---transfer of the val
 
 \textbf{Statistics.} Paired bootstrap over queries ($10{,}000$ resamples) with $95\%$ CIs on each delta; Holm correction across the three host retrievers; a pre-specified non-inferiority margin ($\delta_{\text{NI}}=0.5$ nDCG points) requiring the modifier not to hurt on queries with no negative-treatment in scope.
 
-\textbf{Acceptance criterion (pre-registered).} P1 succeeds iff the modifier yields a positive nDCG@10 delta \emph{and} a reduced stale-citation rate on at least two of three host retrievers, the effect persists on the temporally held-out slice~(b), and non-inferiority holds on the no-stale subset. Failure on slice~(b) but success on~(a) is reported as ``in-distribution only,'' which would \emph{not} support the transfer claim.
+\textbf{Acceptance criterion (pre-specified).} P1 succeeds iff the modifier yields a positive nDCG@10 delta \emph{and} a reduced stale-citation rate on at least two of three host retrievers, the effect persists on the temporally held-out slice~(b), and non-inferiority holds on the no-stale subset. Failure on slice~(b) but success on~(a) is reported as ``in-distribution only,'' which would \emph{not} support the transfer claim.
 
 \subsection{Protocol P2: Citator Agreement for the Treatment Graph}
 \label{app:p2}
@@ -479,7 +479,7 @@ The two construct-validity steps flagged in the Discussion---transfer of the val
 
 \textbf{Downstream link.} On the disagreement subset, the PLRE/stale-cite audit is re-run with citator-corrected closures to measure the \emph{decision-flip rate}, connecting construct validity to risk-decision outcomes.
 
-\textbf{Acceptance criterion (pre-registered).} P2 succeeds iff negative-treatment micro-F1 vs.\ the citator $\ge\!0.80$ and the missed-closure rate is at or below the extractor's audited miss rate (23\%) underlying Table~\ref{tab:edge_sensitivity}; relation types failing the bar are routed to the human review queue and the residual is reported rather than suppressed.
+\textbf{Acceptance criterion (pre-specified).} P2 succeeds iff negative-treatment micro-F1 vs.\ the citator $\ge\!0.80$ and the missed-closure rate is at or below the extractor's audited miss rate (23\%) underlying Table~\ref{tab:edge_sensitivity}; relation types failing the bar are routed to the human review queue and the residual is reported rather than suppressed.
 
 \textbf{Licensing and ethics.} Citator outputs are proprietary and are used solely as an evaluation reference under a licensed account. The release contains the crosswalk, sampling seeds, and agreement statistics, but no redistributed citator content, consistent with the data-governance boundary in the main text.
 
