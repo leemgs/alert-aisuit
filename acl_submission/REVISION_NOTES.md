@@ -70,8 +70,20 @@ A compiled `main.pdf` is included for convenience.
    compensation, and consent information for the three legal specialists and two
    raters, the license of the released dataset, and any AI-assistant use in writing.
    None of this is stated in the paper; consider one sentence in the Ethics Statement.
-5. **Anonymity:** `ai-suit-tracker`, `ai-suit-sensing.csv`, and the GitHub-Actions
-   configuration details in the appendix may be searchable and reveal authorship.
-   Consider renaming them for the review period.
+5. ~~Anonymity~~ — **resolved in the paper.** Distinctive identifiers replaced for
+   review via two macros in `main.tex`:
+   `\trackername` = `alert-tracker` (was `ai-suit-tracker`) and
+   `\schemafile` = `alert-sensing.csv` (was `ai-suit-sensing.csv`).
+   Appendix no longer lists source-file paths (`src/*.py`), the `v02` version tag,
+   the `aisuit` issue label, or exact environment-variable names (these are
+   matchable by GitHub code search); the configuration table uses descriptive
+   parameter names instead. An author-facing note about identifiers was removed
+   from the Ethics Statement. PDF and figure metadata were checked (no author info).
+   **Camera-ready:** restore the two macros and the original appendix identifiers.
+   **Still on you:** (a) the anonymous code/data link in the supplement must be an
+   anonymized mirror (e.g. anonymous.4open.science), not this repository or the
+   tracker repository; (b) the released artifact should use the anonymized names
+   or be withheld until after review; (c) this repository (`alert-aisuit`) contains
+   the AAAI zip/PDF — keep it private or out of any link given to reviewers.
 6. Verify all numbers once more against your logs — no numbers were changed, only
    re-presented.

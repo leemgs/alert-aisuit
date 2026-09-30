@@ -22,7 +22,7 @@ Figure~\ref{fig:alert_arch} shows the architecture: a lightweight sensing pipeli
 % ---- left: sensing pipeline ----
 \node[pipe] (ds) {Data Sources\\[-1pt]{\tiny CourtListener/RECAP $\cdot$ News}};
 \node[pipe, below=0.22cm of ds] (sp) {Detect $\cdot$ Collect};
-\node[pipe, below=0.22cm of sp] (sc) {Schema\\[-1pt]{\ttfamily\resizebox{1.85cm}{!}{ai-suit-sensing.csv}}};
+\node[pipe, below=0.22cm of sp] (sc) {Schema\\[-1pt]{\resizebox{1.85cm}{!}{\schemafile{}}}};
 \draw[arr] (ds) -- (sp);
 \draw[arr] (sp) -- (sc);
 % ---- right: agentic layer ----
@@ -40,15 +40,16 @@ Figure~\ref{fig:alert_arch} shows the architecture: a lightweight sensing pipeli
 % refine loop (Goal Checker -> Planner)
 \draw[arr, draw=blue!60] (gc.east) -- ($(gc.east)+(0.62,0)$) |- (pl.east)
       node[lbl, text=blue!60, pos=0.25, right]{refine};
-% ---- outputs ----
-\node[outbox, below=0.42cm of $(sc)!0.5!(gc)$] (op) {Outputs: GitHub Issues $\cdot$ Slack};
-\draw[arr] (gc.south) |- (op.north);
 % ---- group containers ----
 \begin{scope}[on background layer]
   \node[draw=black!35, dashed, rounded corners=3pt, inner sep=6pt, fit=(ds)(sp)(sc)] (gpipe) {};
   \node[draw=blue!40, dashed, rounded corners=3pt, inner sep=6pt, fit=(pl)(rt)(an)(rp)(gc)] (gag) {};
 \end{scope}
-\node[grplab, above=1pt of gpipe.north] {Sensing Pipeline (\texttt{ai-suit-tracker})};
+% ---- outputs (placed below both groups so it never covers the Goal Checker) ----
+\coordinate (mid) at ($(sc)!0.5!(gc)$);
+\node[outbox, anchor=north] (op) at ([yshift=-0.35cm] mid |- gag.south) {Outputs: GitHub Issues $\cdot$ Slack};
+\draw[arr] (gc.south) -- (gc.south |- op.north);
+\node[grplab, above=1pt of gpipe.north] {Sensing Pipeline (\trackername{})};
 \node[grplab, text=blue!55, above=1pt of gag.north] {Agentic Layer};
 \end{tikzpicture}%
 }
@@ -59,7 +60,7 @@ Figure~\ref{fig:alert_arch} shows the architecture: a lightweight sensing pipeli
 \subsection{Multi-Source Litigation Discovery and Schema Population}
 \label{sec:discovery}
 
-ALERT's discovery layer ingests CourtListener/RECAP~\citep{courtlistener2023}, docket-backed legal-media signals, and keyword-filtered news. A two-stage deduplication module first matches docket IDs and titles, then optionally removes Gemini-embedding neighbors above cosine $0.85$ (Algorithm~\ref{alg:hybrid_dedup}, appendix). Detected filings populate the 22-field \texttt{ai-suit-sensing.csv} schema by combining docket metadata, NER over complaint text, regex extraction for damages, and LLM summarization for the narrative fields.
+ALERT's discovery layer ingests CourtListener/RECAP~\citep{courtlistener2023}, docket-backed legal-media signals, and keyword-filtered news. A two-stage deduplication module first matches docket IDs and titles, then optionally removes Gemini-embedding neighbors above cosine $0.85$ (Algorithm~\ref{alg:hybrid_dedup}, appendix). Detected filings populate the 22-field \schemafile{} schema by combining docket metadata, NER over complaint text, regex extraction for damages, and LLM summarization for the narrative fields.
 
 \subsection{LegalRisk-RAG}
 
@@ -68,7 +69,7 @@ The LegalRisk-RAG pipeline adapts standard RAG to legal text in three ways. \tex
 \subsection{Goal-Conditioned Agentic Loop}
 \label{sec:agentic_loop}
 
-The four specialized agents and the central Goal Checker operate as in Algorithm~\ref{alg:alert_loop}. The \textbf{Planner} decomposes unmet sub-goals into ordered retrieval/analysis sub-tasks; the \textbf{Retriever} runs LegalRisk-RAG queries and reformulates via legal entity term expansion when $\mathcal{G}_{\text{evidence}}$ is unmet; the \textbf{Analyzer} computes $\text{RiskScore}(d_i, P, C)$, clusters evidence, and maps clusters to a risk taxonomy (Training Data, Output Reproduction, API Misuse, Model Weights); the \textbf{Goal Checker} evaluates $\mathcal{G}(R_t)$ after each pass and returns machine-readable residuals such as \texttt{missing(valid-authority, DMCA, output-CMI, NDCA, 2025-02)}; the Planner converts these critiques into expanded entity/date/theory queries; and the \textbf{Reporter} assembles the risk register, per-risk evidence with citations, and mitigation guidance. The ingestion and risk-scoring components are released as \texttt{ai-suit-tracker} (anonymous review URL in the supplement), with configuration, prompt templates, and run parameters in the appendix.
+The four specialized agents and the central Goal Checker operate as in Algorithm~\ref{alg:alert_loop}. The \textbf{Planner} decomposes unmet sub-goals into ordered retrieval/analysis sub-tasks; the \textbf{Retriever} runs LegalRisk-RAG queries and reformulates via legal entity term expansion when $\mathcal{G}_{\text{evidence}}$ is unmet; the \textbf{Analyzer} computes $\text{RiskScore}(d_i, P, C)$, clusters evidence, and maps clusters to a risk taxonomy (Training Data, Output Reproduction, API Misuse, Model Weights); the \textbf{Goal Checker} evaluates $\mathcal{G}(R_t)$ after each pass and returns machine-readable residuals such as \texttt{missing(valid-authority, DMCA, output-CMI, NDCA, 2025-02)}; the Planner converts these critiques into expanded entity/date/theory queries; and the \textbf{Reporter} assembles the risk register, per-risk evidence with citations, and mitigation guidance. The ingestion and risk-scoring components are released as \trackername{} (anonymous review URL in the supplement), with configuration, prompt templates, and run parameters in the appendix.
 
 \subsection{Supersession-Aware Temporal Precedent Graph}
 \label{sec:tpg}
