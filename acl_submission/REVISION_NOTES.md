@@ -64,8 +64,14 @@ A compiled `main.pdf` is included for convenience.
    what Table (robustness) shows (full system F1 0.81→0.76, 2.4→2.6 iterations), and
    Limitations names backbone-matched baseline comparisons as an open test. If baseline
    runs on the open-weights stack become available, add them to that table.
-3. **Protocol P1** (external-stack transfer) is still unexecuted; it remains the most
-   likely reviewer objection to the "generality" claim.
+3. **Protocol P1** — **not executed; claims adjusted.** Authors confirmed there are no
+   P1 results. Generality claims now match the evidence: Introduction and Discussion
+   say the operator is general in form but evaluated only on U.S. AI litigation
+   within ALERT; Limitations states the gains should not be read as evidence for
+   other retrievers or domains. "Pre-registered" was changed to "pre-specified"
+   throughout (the protocols are not deposited in an external registry; if they
+   are, e.g. on OSF, restore the term and add the link after review). Running P1
+   remains the single experiment most likely to strengthen the paper.
 4. ~~Responsible NLP checklist~~ — **drafted.** Ethics Statement now states the
    dataset/code licenses (CC BY 4.0 / MIT), source-data terms and personal names in
    public filings, annotator recruitment/payment (institution staff, regular duties),
