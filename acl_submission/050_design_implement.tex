@@ -2,74 +2,17 @@
 \label{sec:framework}
 \subsection{System Overview}
 
-Figure~\ref{fig:alert_arch} shows the architecture: a lightweight sensing pipeline populates evidence records, while the agentic layer plans, retrieves, verifies, and reports under a deterministic Goal Checker. The authority gate (\S\ref{sec:tpg}) sits inside the Retriever.
-
-\begin{figure}[t]
-\centering
-\resizebox{\linewidth}{!}{%
-\begin{tikzpicture}[
-  font=\footnotesize,
-  box/.style={rectangle, rounded corners=2pt, draw, minimum height=0.56cm,
-              align=center, inner sep=3pt, text width=2.05cm, line width=0.5pt},
-  pipe/.style={box, fill=black!5, draw=black!55},
-  agent/.style={box, fill=blue!8, draw=blue!55},
-  outbox/.style={rectangle, rounded corners=2pt, draw=green!50!black, fill=green!10,
-              align=center, inner sep=4pt, minimum height=0.55cm, text width=6.4cm, line width=0.5pt},
-  arr/.style={-{Latex[length=1.4mm]}, draw=black!70, line width=0.5pt},
-  lbl/.style={font=\scriptsize\itshape, text=black!55},
-  grplab/.style={font=\scriptsize\bfseries, text=black!60}
-]
-% ---- left: sensing pipeline ----
-\node[pipe] (ds) {Data Sources\\[-1pt]{\tiny CourtListener/RECAP $\cdot$ News}};
-\node[pipe, below=0.22cm of ds] (sp) {Detect $\cdot$ Collect};
-\node[pipe, below=0.22cm of sp] (sc) {Schema\\[-1pt]{\resizebox{1.85cm}{!}{\schemafile{}}}};
-\draw[arr] (ds) -- (sp);
-\draw[arr] (sp) -- (sc);
-% ---- right: agentic layer ----
-\node[agent, right=2.0cm of ds] (pl) {Planner};
-\node[agent, below=0.20cm of pl] (rt) {Retriever\\[-1pt]{\tiny LegalRisk-RAG}};
-\node[agent, below=0.20cm of rt] (an) {Analyzer\\[-1pt]{\tiny Risk Scoring}};
-\node[agent, below=0.20cm of an] (rp) {Reporter};
-\node[agent, below=0.20cm of rp] (gc) {Goal Checker};
-\draw[arr] (pl) -- (rt);
-\draw[arr] (rt) -- (an);
-\draw[arr] (an) -- (rp);
-\draw[arr] (rp) -- (gc);
-% schema feeds the agentic layer
-\draw[arr] (sc.east) -- ($(sc.east)+(0.55,0)$) |- (pl.west) node[lbl, pos=0.72, above]{CSV};
-% refine loop (Goal Checker -> Planner)
-\draw[arr, draw=blue!60] (gc.east) -- ($(gc.east)+(0.62,0)$) |- (pl.east)
-      node[lbl, text=blue!60, pos=0.25, right]{refine};
-% ---- group containers ----
-\begin{scope}[on background layer]
-  \node[draw=black!35, dashed, rounded corners=3pt, inner sep=6pt, fit=(ds)(sp)(sc)] (gpipe) {};
-  \node[draw=blue!40, dashed, rounded corners=3pt, inner sep=6pt, fit=(pl)(rt)(an)(rp)(gc)] (gag) {};
-\end{scope}
-% ---- outputs (placed below both groups so it never covers the Goal Checker) ----
-\coordinate (mid) at ($(sc)!0.5!(gc)$);
-\node[outbox, anchor=north] (op) at ([yshift=-0.35cm] mid |- gag.south) {Outputs: GitHub Issues $\cdot$ Slack};
-\draw[arr] (gc.south) -- (gc.south |- op.north);
-\node[grplab, above=1pt of gpipe.north] {Sensing Pipeline (\trackername{})};
-\node[grplab, text=blue!55, above=1pt of gag.north] {Agentic Layer};
-\end{tikzpicture}%
-}
-\caption{ALERT architecture. The sensing pipeline (left) detects filings, collects documents, and populates the schema; the agentic layer (right) plans, retrieves time-valid precedent, scores risk, and reports, with the Goal Checker driving a refine loop until evidence coverage is met.}
-\label{fig:alert_arch}
-\end{figure}
-
-\subsection{Multi-Source Litigation Discovery and Schema Population}
-\label{sec:discovery}
-
-ALERT's discovery layer ingests CourtListener/RECAP~\citep{courtlistener2023}, docket-backed legal-media signals, and keyword-filtered news. A two-stage deduplication module first matches docket IDs and titles, then optionally removes Gemini-embedding neighbors above cosine $0.85$ (Algorithm~\ref{alg:hybrid_dedup}, appendix). Detected filings populate the 22-field \schemafile{} schema by combining docket metadata, NER over complaint text, regex extraction for damages, and LLM summarization for the narrative fields.
+ALERT has two layers. A sensing pipeline discovers AI-litigation filings in CourtListener/RECAP~\citep{courtlistener2023} and legal news and turns them into structured case records; it is engineering infrastructure and is documented in Appendix~\ref{app:impl} (architecture in Figure~\ref{fig:alert_arch}). This section describes the NLP components that the experiments evaluate: retrieval over legal text (\S\ref{sec:legalrag}), the agentic loop (\S\ref{sec:agentic_loop}), the temporal authority gate (\S\ref{sec:tpg}), and the PLRE task (\S\ref{sec:plre}).
 
 \subsection{LegalRisk-RAG}
+\label{sec:legalrag}
 
 The LegalRisk-RAG pipeline adapts standard RAG to legal text in three ways. \textbf{Chunking} segments documents at \emph{logical structural boundaries}---numbered claims, ``WHEREFORE'' clauses, section headings---rather than fixed token windows, and each chunk retains a metadata header (case id, filing date, court level, section type). \textbf{Embedding}: we compared a dense retriever~\citep{karpukhin2020dense} (\texttt{text-embedding-3-large}), RECAP-tuned LegalBERT~\citep{chalkidis2020legalbert}, and a hybrid BM25 + neural re-ranker on a 200-pair development set; the hybrid (best) is the default (Table~\ref{tab:retriever_ablation}, appendix). \textbf{Dynamic context expansion (precedent chaining)}: when a retrieved chunk references a prior case (e.g., \emph{Authors Guild v.\ Google}), the pipeline appends that opinion as secondary context and queries the temporal precedent graph for subsequent treatment, so the Analyzer receives both semantic neighbors and validity metadata (cited positively, narrowed, superseded, or overruled at the filing date).
 
 \subsection{Goal-Conditioned Agentic Loop}
 \label{sec:agentic_loop}
 
-The four specialized agents and the central Goal Checker operate as in Algorithm~\ref{alg:alert_loop}. The \textbf{Planner} decomposes unmet sub-goals into ordered retrieval/analysis sub-tasks; the \textbf{Retriever} runs LegalRisk-RAG queries and reformulates via legal entity term expansion when $\mathcal{G}_{\text{evidence}}$ is unmet; the \textbf{Analyzer} computes $\text{RiskScore}(d_i, P, C)$, clusters evidence, and maps clusters to a risk taxonomy (Training Data, Output Reproduction, API Misuse, Model Weights); the \textbf{Goal Checker} evaluates $\mathcal{G}(R_t)$ after each pass and returns machine-readable residuals such as \texttt{missing(valid-authority, DMCA, output-CMI, NDCA, 2025-02)}; the Planner converts these critiques into expanded entity/date/theory queries; and the \textbf{Reporter} assembles the risk register, per-risk evidence with citations, and mitigation guidance. The ingestion and risk-scoring components are released as \trackername{} (anonymous review URL in the supplement), with configuration, prompt templates, and run parameters in the appendix.
+The four specialized agents and the central Goal Checker operate as in Algorithm~\ref{alg:alert_loop}. The \textbf{Planner} decomposes unmet sub-goals into ordered retrieval/analysis sub-tasks; the \textbf{Retriever} runs LegalRisk-RAG queries and reformulates via legal entity term expansion when $\mathcal{G}_{\text{evidence}}$ is unmet; the \textbf{Analyzer} computes $\text{RiskScore}(d_i, P, C)$, clusters evidence, and maps clusters to a risk taxonomy (Training Data, Output Reproduction, API Misuse, Model Weights); the \textbf{Goal Checker} evaluates $\mathcal{G}(R_t)$ after each pass and returns machine-readable residuals such as \texttt{missing(valid-authority, DMCA, output-CMI, NDCA, 2025-02)}; the Planner converts these critiques into expanded entity/date/theory queries; and the \textbf{Reporter} assembles the risk register, per-risk evidence with citations, and mitigation guidance.
 
 \subsection{Supersession-Aware Temporal Precedent Graph}
 \label{sec:tpg}
@@ -102,7 +45,28 @@ We cast product--litigation alignment as a risk-entailment task. Given a product
 \begin{equation}
   y_{ij}=\mathbf{1}[P,p_i,\mathcal{P}_{t_q} \models T_j].
 \end{equation}
-Unlike symmetric similarity, PLRE is directional: an attribute such as ``web-scale image scraping'' can support exposure to a training-data copyright theory, while the inverse relation is not meaningful. Unlike standard legal textual entailment, the premise includes product attributes and the entailment relation is conditioned on time-valid precedent. A pair $(p_i,T_j)$ is promoted to the risk register only when (i) the entailment score exceeds the validation-set threshold, (ii) the top supporting precedents are valid at $t_q$, and (iii) the report includes mitigation text grounded in at least three cited authorities when available.
+\begin{table}[t]
+\centering
+\caption{Schematic PLRE instances (illustrative; not drawn from ALERT-Dataset). The same attribute--theory pair can be positive or negative depending on whether its supporting authority is still operative at $t_q$.}
+\label{tab:plre_example}
+\small
+\setlength{\tabcolsep}{3pt}
+\resizebox{\columnwidth}{!}{%
+\begin{tabular}{p{2.3cm} p{2.2cm} p{2.4cm} c}
+\toprule
+\textbf{Attribute $p_i$} & \textbf{Theory $T_j$} & \textbf{Support at $t_q$} & $y_{ij}$ \\
+\midrule
+web-scale image scraping for training & training-data copyright infringement & operative authority on unlicensed training copies & 1 \\
+\addlinespace
+same & same & only authority whose interval closed before $t_q$ (stale distractor) & 0 \\
+\addlinespace
+output filter removes copyright-management information & DMCA \S1202 (output CMI) & no authority in the query's jurisdiction & 0 \\
+\bottomrule
+\end{tabular}%
+}
+\end{table}
+
+Table~\ref{tab:plre_example} gives schematic instances. Unlike symmetric similarity, PLRE is directional: an attribute such as ``web-scale image scraping'' can support exposure to a training-data copyright theory, while the inverse relation is not meaningful. Unlike standard legal textual entailment, the premise includes product attributes and the entailment relation is conditioned on time-valid precedent. A pair $(p_i,T_j)$ is promoted to the risk register only when (i) the entailment score exceeds the validation-set threshold, (ii) the top supporting precedents are valid at $t_q$, and (iii) the report includes mitigation text grounded in at least three cited authorities when available.
 
 PLRE gold labels are built from anonymized product-attribute cards and docket-grounded theory cards. Annotators judge a directional pair as positive only when the product attribute, legal theory, query date, and at least one valid supporting authority jointly support exposure; negative pairs include ordinary mismatches and stale-authority distractors. Crucially, the validity judgment in the labels is made by annotators reading docket and opinion text, \emph{independently of ALERT's automatically extracted treatment graph}, so the gate must recover label validity rather than presuppose it; an extractor-independent re-check of these validity judgments against an authoritative citator is the downstream link of Protocol~P2. Product archetypes are tracked in the split manifest, and year/litigation type are stratified to reduce temporal and topical leakage.
 

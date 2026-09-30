@@ -101,3 +101,19 @@ A compiled `main.pdf` is included for convenience.
    the AAAI zip/PDF — keep it private or out of any link given to reviewers.
 6. Verify all numbers once more against your logs — no numbers were changed, only
    re-presented.
+
+## Reviewer-simulation follow-ups (W7, W9)
+
+- **W9 (systems vs. NLP balance):** architecture figure, discovery/schema-population
+  subsection, and the annual ingestion table moved to the appendix (App. D.1 and
+  App. A); §4.1 now frames the sensing pipeline as infrastructure and points to the
+  NLP components; RQ4 shortened to one sentence. Freed space holds a schematic PLRE
+  instance table (Table 1, explicitly illustrative, built from examples already in
+  the paper) and the new related-work paragraph.
+- **W7 (related work):** new *Time-sensitive QA and temporal retrieval* paragraph
+  (SituatedQA, TimeQA, StreamingQA, RealTime QA, CronKGQA, temporal IR survey) that
+  distinguishes time-stamped facts from supersession; *Citators and legal citation
+  graphs* now cites citation-network analysis (Fowler et al., 2007) and automatic
+  citation-edge labeling (Sadeghian et al., 2018), and states plainly that the
+  scoring function is simple and the contribution is the validated treatment layer.
+  **Please verify the bibliographic details of these eight new entries.**

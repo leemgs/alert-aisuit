@@ -57,6 +57,30 @@ Table~\ref{tab:full_schema} lists all 22 fields of \schemafile{}, with type, req
 }
 \end{table}
 
+Table~\ref{tab:dataset_annual} gives the raw annual ingestion counts by litigation type, before deduplication and quality screening.
+
+\begin{table}[h]
+\centering
+\caption{Annual filing breakdown by litigation type. Counts are raw ingested filings (1,260) before deduplication; the annotated subset contains 1,247 cases.}
+\label{tab:dataset_annual}
+\resizebox{\columnwidth}{!}{%
+\begin{tabular}{lcccc|c}
+\toprule
+\textbf{Year} & \textbf{Copyright} & \textbf{DMCA} & \textbf{Trade Secret} & \textbf{Other} & \textbf{Total} \\
+\midrule
+2020 & 28  & 9   & 7  & 3  & 47  \\
+2021 & 41  & 14  & 10 & 4  & 69  \\
+2022 & 89  & 31  & 22 & 8  & 150 \\
+2023 & 198 & 72  & 51 & 19 & 340 \\
+2024 & 261 & 96  & 64 & 24 & 445 \\
+2025 & 122 & 47  & 29 & 11 & 209 \\
+\midrule
+\textbf{Total} & \textbf{739} & \textbf{269} & \textbf{183} & \textbf{69} & \textbf{1,260} \\
+\bottomrule
+\end{tabular}%
+}
+\end{table}
+
 \section{Ingestion-Layer Scoring Matrix}
 \label{app:risk_matrix}
 
@@ -106,6 +130,67 @@ The \texttt{Progress Notes} field (field~20) uses Markdown \texttt{\#\#} headers
 
 \section{Open-Source Implementation Details}
 \label{app:impl}
+
+\subsection{System Architecture and Discovery}
+
+Figure~\ref{fig:alert_arch} shows how the sensing pipeline feeds the agentic layer evaluated in the main text. ALERT's discovery layer ingests CourtListener/RECAP~\citep{courtlistener2023}, docket-backed legal-media signals, and keyword-filtered news. A two-stage deduplication module first matches docket IDs and titles, then optionally removes Gemini-embedding neighbors above cosine $0.85$ (Algorithm~\ref{alg:hybrid_dedup}, appendix). Detected filings populate the 22-field \schemafile{} schema by combining docket metadata, NER over complaint text, regex extraction for damages, and LLM summarization for the narrative fields.
+The ingestion and risk-scoring components are released as \trackername{} (anonymous review URL in the supplement).
+
+\begin{figure}[h]
+\centering
+\resizebox{\linewidth}{!}{%
+\begin{tikzpicture}[
+  font=\footnotesize,
+  box/.style={rectangle, rounded corners=2pt, draw, minimum height=0.56cm,
+              align=center, inner sep=3pt, text width=2.05cm, line width=0.5pt},
+  pipe/.style={box, fill=black!5, draw=black!55},
+  agent/.style={box, fill=blue!8, draw=blue!55},
+  outbox/.style={rectangle, rounded corners=2pt, draw=green!50!black, fill=green!10,
+              align=center, inner sep=4pt, minimum height=0.55cm, text width=6.4cm, line width=0.5pt},
+  arr/.style={-{Latex[length=1.4mm]}, draw=black!70, line width=0.5pt},
+  lbl/.style={font=\scriptsize\itshape, text=black!55},
+  grplab/.style={font=\scriptsize\bfseries, text=black!60}
+]
+% ---- left: sensing pipeline ----
+\node[pipe] (ds) {Data Sources\\[-1pt]{\tiny CourtListener/RECAP $\cdot$ News}};
+\node[pipe, below=0.22cm of ds] (sp) {Detect $\cdot$ Collect};
+\node[pipe, below=0.22cm of sp] (sc) {Schema\\[-1pt]{\resizebox{1.85cm}{!}{\schemafile{}}}};
+\draw[arr] (ds) -- (sp);
+\draw[arr] (sp) -- (sc);
+% ---- right: agentic layer ----
+\node[agent, right=2.0cm of ds] (pl) {Planner};
+\node[agent, below=0.20cm of pl] (rt) {Retriever\\[-1pt]{\tiny LegalRisk-RAG}};
+\node[agent, below=0.20cm of rt] (an) {Analyzer\\[-1pt]{\tiny Risk Scoring}};
+\node[agent, below=0.20cm of an] (rp) {Reporter};
+\node[agent, below=0.20cm of rp] (gc) {Goal Checker};
+\draw[arr] (pl) -- (rt);
+\draw[arr] (rt) -- (an);
+\draw[arr] (an) -- (rp);
+\draw[arr] (rp) -- (gc);
+% schema feeds the agentic layer
+\draw[arr] (sc.east) -- ($(sc.east)+(0.55,0)$) |- (pl.west) node[lbl, pos=0.72, above]{CSV};
+% refine loop (Goal Checker -> Planner)
+\draw[arr, draw=blue!60] (gc.east) -- ($(gc.east)+(0.62,0)$) |- (pl.east)
+      node[lbl, text=blue!60, pos=0.25, right]{refine};
+% ---- group containers ----
+\begin{scope}[on background layer]
+  \node[draw=black!35, dashed, rounded corners=3pt, inner sep=6pt, fit=(ds)(sp)(sc)] (gpipe) {};
+  \node[draw=blue!40, dashed, rounded corners=3pt, inner sep=6pt, fit=(pl)(rt)(an)(rp)(gc)] (gag) {};
+\end{scope}
+% ---- outputs (placed below both groups so it never covers the Goal Checker) ----
+\coordinate (mid) at ($(sc)!0.5!(gc)$);
+\node[outbox, anchor=north] (op) at ([yshift=-0.35cm] mid |- gag.south) {Outputs: GitHub Issues $\cdot$ Slack};
+\draw[arr] (gc.south) -- (gc.south |- op.north);
+\node[grplab, above=1pt of gpipe.north] {Sensing Pipeline (\trackername{})};
+\node[grplab, text=blue!55, above=1pt of gag.north] {Agentic Layer};
+\end{tikzpicture}%
+}
+\caption{ALERT architecture. The sensing pipeline (left) detects filings, collects documents, and populates the schema; the agentic layer (right) plans, retrieves time-valid precedent, scores risk, and reports, with the Goal Checker driving a refine loop until evidence coverage is met.}
+\label{fig:alert_arch}
+\end{figure}
+
+\subsection{Sensing Tool}
+
 
 The \trackername{} tool runs on an adaptive, configurable GitHub Actions schedule: hourly during a configurable business-hours window and two-hourly off-hours. On-demand execution via \texttt{workflow\_dispatch} is also supported. Its principal modules are:
 
