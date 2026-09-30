@@ -66,10 +66,13 @@ A compiled `main.pdf` is included for convenience.
    runs on the open-weights stack become available, add them to that table.
 3. **Protocol P1** (external-stack transfer) is still unexecuted; it remains the most
    likely reviewer objection to the "generality" claim.
-4. **Responsible NLP checklist** (portal): you will need annotator/rater recruitment,
-   compensation, and consent information for the three legal specialists and two
-   raters, the license of the released dataset, and any AI-assistant use in writing.
-   None of this is stated in the paper; consider one sentence in the Ethics Statement.
+4. ~~Responsible NLP checklist~~ — **drafted.** Ethics Statement now states the
+   dataset/code licenses (CC BY 4.0 / MIT), source-data terms and personal names in
+   public filings, annotator recruitment/payment (institution staff, regular duties),
+   verbal consent, why no ethics-board review was sought, and AI-assistant use
+   (editing only). Draft form answers with section references are in
+   `RESPONSIBLE_NLP_CHECKLIST.md`. **Still TODO:** compute budget (C1), software
+   libraries (C4), optional annotator background (D5).
 5. ~~Anonymity~~ — **resolved in the paper.** Distinctive identifiers replaced for
    review via two macros in `main.tex`:
    `\trackername` = `alert-tracker` (was `ai-suit-tracker`) and
