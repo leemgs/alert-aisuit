@@ -4,51 +4,36 @@
 
 \subsection{Experimental Setup}
 
-\textbf{Dataset split and label provenance.} We partition ALERT-Dataset into stratified 70/10/20 train/validation/test splits by year and litigation type. Because 847 of 1{,}247 labels originate from an automated pre-labeler and 400 are human-adjudicated, primary significance claims are computed only on the human-adjudicated subset; retained-label results are reported only for scale. This avoids making the rule-based pre-labeler part of the acceptance evidence.
+We address six research questions: triage-label agreement (RQ1), report quality (RQ2), loop and temporal-graph ablations (RQ3), schema completeness (RQ4), PLRE (RQ5), and evidence-coverage risk control (RQ6).
 
-\textbf{Baselines.} We compare ALERT with five risk-classification baselines: \textbf{B1 Rule-Based} (the ingestion-layer scorer); \textbf{B2 Single-Pass LLM}; \textbf{B3 RAG-only}; \textbf{B4 Single-Agent} (ALERT without the goal-conditioned loop); and \textbf{B5 Compute-Matched Self-Refinement} (a Reflexion-style baseline with ALERT's mean LLM-call budget, 2.4 iterations). For PLRE we add non-ALERT baselines that isolate the suspected confounds: product--theory cosine, LegalBERT product--theory NLI, COLIEE-style precedent retrieval with no interval closure, and ALERT without temporal gating. These baselines separate product--theory matching, legal entailment, retrieval quality, test-time compute, and the hard validity gate.
+\textbf{Dataset split and label provenance.} We partition ALERT-Dataset into stratified 70/10/20 train/validation/test splits by year and litigation type. Because 847 of 1{,}247 labels originate from an automated pre-labeler and 400 are human-adjudicated, primary significance claims are computed only on the human-adjudicated subset; retained-label results are reported only for scale. This keeps the rule-based pre-labeler out of the evidence for our primary claims.
+
+\textbf{Baselines.} We compare ALERT with five risk-classification baselines: \textbf{B1 Rule-Based} (the ingestion-layer scorer); \textbf{B2 Single-Pass LLM}; \textbf{B3 RAG-only}; \textbf{B4 Single-Agent} (ALERT without the goal-conditioned loop); and \textbf{B5 Compute-Matched Self-Refinement} (a Reflexion-style baseline~\citep{shinn2023reflexion} given ALERT's mean budget of 2.4 iterations). For PLRE we add non-ALERT baselines that isolate the suspected confounds: product--theory cosine, LegalBERT product--theory NLI, COLIEE-style~\citep{rabelo2022coliee} precedent retrieval with no interval closure, and ALERT without temporal gating. These baselines separate product--theory matching, legal entailment, retrieval quality, test-time compute, and the hard validity gate.
 
 \textbf{Evaluation metrics.} We report macro F1/precision/recall over three severity labels, report-quality ratings by two blinded specialists, loop efficiency, schema completeness, PLRE P/R/F1, edge-error propagation, and evidence-coverage omission risk under calibrated thresholds. Severity-label F1 measures triage-label agreement, not legal liability. Significance uses a paired bootstrap over test predictions ($10{,}000$ resamples); calibrated omission risk and backbone robustness are reported in the appendix, with hyperparameters in Table~\ref{tab:hyperparams}.
 
-\subsection{RQ1: Triage-Label Agreement and Human-Adjudicated Check}
+\subsection{RQ1: Triage-Label Agreement}
 
-Table~\ref{tab:human_only_main} is the primary circularity check: ALERT outperforms the compute-matched self-refinement baseline by 4 F1 points without retained pre-labels (paired bootstrap, $p<0.05$). Although the marginal confidence intervals overlap, the paired bootstrap scores per-item differences on shared test cases and thus removes the between-case variance that dominates the marginal intervals; the gap over B5 should nonetheless be read as modest. Table~\ref{tab:rq1} reports the full held-out set for scale; the same ordering persists.
+Table~\ref{tab:human_only_main} reports severity-label agreement on the human-adjudicated subset, our primary circularity check. ALERT outperforms the compute-matched self-refinement baseline (B5) by 4 F1 points (paired bootstrap, $p<0.05$). The marginal intervals overlap, but the paired bootstrap scores per-item differences on shared test cases and thus removes the between-case variance that dominates them; we nonetheless read the gap over B5 as modest. On the full held-out test set (including retained pre-labels; last column and Table~\ref{tab:rq1}) the same ordering holds.
 
 \begin{table}[t]
 \centering
-\caption{Human-adjudicated subset only (primary validity result). This removes retained pre-labels; intervals are paired bootstrap ($10{,}000$ resamples).}
+\caption{Macro severity-label agreement. F1/P/R are on the human-adjudicated test subset (primary result; $\pm$ are paired-bootstrap intervals, $10{,}000$ resamples). The last column is F1 on the full held-out test set, which includes retained pre-labels (details in Table~\ref{tab:rq1}).}
 \label{tab:human_only_main}
+\small
+\setlength{\tabcolsep}{3pt}
 \resizebox{\columnwidth}{!}{%
-\begin{tabular}{lccc}
+\begin{tabular}{lccc|c}
 \toprule
-\textbf{System} & \textbf{F1} & \textbf{Precision} & \textbf{Recall} \\
+ & \multicolumn{3}{c|}{\textbf{Human-adjudicated}} & \textbf{Full} \\
+\textbf{System} & \textbf{F1} & \textbf{P} & \textbf{R} & \textbf{F1} \\
 \midrule
-B1 Rule-Based              & $0.55 \pm 0.03$ & $0.52 \pm 0.04$ & $0.59 \pm 0.04$ \\
-B2 Single-Pass LLM         & $0.70 \pm 0.03$ & $0.72 \pm 0.03$ & $0.68 \pm 0.03$ \\
-B3 RAG-only                & $0.72 \pm 0.03$ & $0.73 \pm 0.03$ & $0.71 \pm 0.03$ \\
-B4 Single-Agent            & $0.74 \pm 0.02$ & $0.75 \pm 0.03$ & $0.73 \pm 0.03$ \\
-B5 Self-Refinement         & $0.75 \pm 0.02$ & $0.76 \pm 0.03$ & $0.74 \pm 0.03$ \\
-\textbf{ALERT Full}        & $\mathbf{0.79 \pm 0.02}$ & $\mathbf{0.80 \pm 0.02}$ & $\mathbf{0.78 \pm 0.03}$ \\
-\bottomrule
-\end{tabular}%
-}
-\end{table}
-
-\begin{table}[t]
-\centering
-\caption{Full held-out test set, reported for scale and comparability. B5 is compute-matched to ALERT's mean iteration budget.}
-\label{tab:rq1}
-\resizebox{\columnwidth}{!}{%
-\begin{tabular}{lccc}
-\toprule
-\textbf{System} & \textbf{F1} & \textbf{Precision} & \textbf{Recall} \\
-\midrule
-B1 Rule-Based              & $0.62 \pm 0.02$ & $0.58 \pm 0.03$ & $0.67 \pm 0.02$ \\
-B2 Single-Pass LLM         & $0.72 \pm 0.02$ & $0.74 \pm 0.02$ & $0.70 \pm 0.03$ \\
-B3 RAG-only                & $0.74 \pm 0.02$ & $0.75 \pm 0.02$ & $0.72 \pm 0.02$ \\
-B4 Single-Agent            & $0.76 \pm 0.02$ & $0.77 \pm 0.02$ & $0.75 \pm 0.02$ \\
-B5 Self-Refinement         & $0.77 \pm 0.02$ & $0.78 \pm 0.02$ & $0.76 \pm 0.02$ \\
-\textbf{ALERT Full}        & $\mathbf{0.81 \pm 0.01}$ & $\mathbf{0.82 \pm 0.02}$ & $\mathbf{0.80 \pm 0.02}$ \\
+B1 Rule-Based        & $0.55 \pm 0.03$ & $0.52 \pm 0.04$ & $0.59 \pm 0.04$ & $0.62$ \\
+B2 Single-Pass LLM   & $0.70 \pm 0.03$ & $0.72 \pm 0.03$ & $0.68 \pm 0.03$ & $0.72$ \\
+B3 RAG-only          & $0.72 \pm 0.03$ & $0.73 \pm 0.03$ & $0.71 \pm 0.03$ & $0.74$ \\
+B4 Single-Agent      & $0.74 \pm 0.02$ & $0.75 \pm 0.03$ & $0.73 \pm 0.03$ & $0.76$ \\
+B5 Self-Refinement   & $0.75 \pm 0.02$ & $0.76 \pm 0.03$ & $0.74 \pm 0.03$ & $0.77$ \\
+\textbf{ALERT Full}  & $\mathbf{0.79 \pm 0.02}$ & $\mathbf{0.80 \pm 0.02}$ & $\mathbf{0.78 \pm 0.03}$ & $\mathbf{0.81}$ \\
 \bottomrule
 \end{tabular}%
 }
@@ -56,11 +41,11 @@ B5 Self-Refinement         & $0.77 \pm 0.02$ & $0.78 \pm 0.02$ & $0.76 \pm 0.02$
 
 \subsection{RQ2: Report Quality}
 
-Two blinded legal specialists rated 75 randomized reports (15 each for ALERT and B2--B5) on Accuracy, Completeness, Actionability, Evidence Sufficiency, and Clarity. ALERT scores 4.3/4.1/4.2/4.4/3.9, with significant gains over all non-ALERT baselines ($p<0.05$); the largest gain is Evidence Sufficiency; given the two-rater sample we treat RQ2 as supporting evidence.
+Two blinded legal specialists rated 75 randomized reports (15 each for ALERT and B2--B5) on Accuracy, Completeness, Actionability, Evidence Sufficiency, and Clarity. on a 5-point scale. ALERT scores 4.3/4.1/4.2/4.4/3.9, with significant gains over all baselines (Wilcoxon signed-rank, $p<0.05$); the largest gain is in Evidence Sufficiency. Given the two-rater sample, we treat RQ2 as supporting evidence only.
 
 \subsection{RQ3: Agentic Loop and Temporal Graph Ablations}
 
-Because temporal precedent reasoning is the central claim, Table~\ref{tab:temporal_ablation} decomposes validity-interval gating and treatment-edge weighting. Removing treatment weighting and then interval gating each degrades PLRE F1; the full-vs-flat gap is 6 F1 points ($p<0.01$), and stale citations rise from 4.1\% to 12.7\%. The failure mode is exactly what Eq.~\eqref{eq:tpg_score} targets: flat retrieval can rank a lexically close but already-closed authority above a still-operative one, changing which evidence reaches the generator rather than merely adding a warning after generation. This makes the table the main methodological result rather than an operational deployment metric.
+Because temporal precedent reasoning is the central claim, Table~\ref{tab:temporal_ablation} decomposes validity-interval gating and treatment-edge weighting. Removing treatment weighting and then interval gating each degrades PLRE F1; the full-vs-flat gap is 6 F1 points ($p<0.01$), and stale citations rise from 4.1\% to 12.7\%. The failure mode is exactly what Eq.~\eqref{eq:tpg_score} targets: flat retrieval can rank a lexically close but already-closed authority above a still-operative one, changing which evidence reaches the generator rather than merely adding a warning after generation. This is the paper's main methodological result.
 
 \begin{table}[t]
 \centering
@@ -81,7 +66,7 @@ $-$ interval gating (flat similarity)     & 0.72 & $-6$ & 12.7 \\
 }
 \end{table}
 
-Table~\ref{tab:edge_sensitivity} masks negative-treatment closures before retrieval. The observed extractor is useful but not lossless: at the observed 23\% missed-closure level, stale-cite rate roughly doubles and PLRE F1 declines. ALERT therefore treats low-confidence negative edges as self-verification failures: they are blocked from automatic interval closure, trigger retrieval of independent treatment evidence, and are surfaced as unresolved legal-status atoms if the Goal Checker cannot satisfy coverage. This critique loop is what justifies the extra agentic structure: it localizes extractor uncertainty before it becomes an unqualified PLRE support claim.
+Table~\ref{tab:edge_sensitivity} masks negative-treatment closures before retrieval. The observed extractor is useful but not lossless: at the observed 23\% missed-closure level, stale-cite rate roughly doubles and PLRE F1 declines. ALERT therefore treats low-confidence negative edges as self-verification failures: they are blocked from automatic interval closure, trigger retrieval of independent treatment evidence, and are surfaced as unresolved legal-status atoms if the Goal Checker cannot satisfy coverage. This critique loop is what motivates the agentic structure: it localizes extractor uncertainty before it becomes an unqualified PLRE support claim.
 
 \begin{table}[t]
 \centering
@@ -112,7 +97,7 @@ On 150 newly detected cases, ALERT-automated records reach 97.2\% completeness o
 
 \subsection{RQ5: Product--Litigation Risk Entailment}
 
-PLRE is evaluated on anonymized AI product specs spanning five archetypes and 312 product-mapping cases, so it is an initial benchmark. Positive labels require a product attribute, a legal-risk theory, a query date, and time-valid supporting authority; negative labels include ordinary mismatches and stale-authority distractors. Table~\ref{tab:plre_external} shows ALERT reaches 0.78 F1; the no-temporal variant drops by 6 points, decomposed in Table~\ref{tab:temporal_ablation}. The result should be read as evidence for the validity-gated entailment formulation, not as a claim that all AI-product litigation is covered.
+PLRE is evaluated on anonymized AI product specs spanning five archetypes and 312 product-mapping cases, so it is an initial benchmark. Positive labels require a product attribute, a legal-risk theory, a query date, and time-valid supporting authority; negative labels include ordinary mismatches and stale-authority distractors. In Table~\ref{tab:plre_external}, ALERT reaches 0.78 F1 and outperforms all external baselines; removing temporal gating costs 6 points (decomposed in Table~\ref{tab:temporal_ablation}). Given its scale, we read this as evidence for the validity-gated formulation, not as coverage of all AI-product litigation.
 
 \begin{table}[t]
 \centering
@@ -130,7 +115,7 @@ LegalBERT product--theory NLI           & 0.69 & 0.68 & 0.68 \\
 COLIEE-style retrieval, no gate       & 0.71 & 0.70 & 0.70 \\
 RAG-only generation                    & 0.73 & 0.74 & 0.73 \\
 ALERT without temporal gating          & 0.72 & 0.73 & 0.72 \\
-\textbf{ALERT Full}                    & 0.77 & 0.80 & 0.78 \\
+\textbf{ALERT Full}                    & \textbf{0.77} & \textbf{0.80} & \textbf{0.78} \\
 \bottomrule
 \end{tabular}%
 }
@@ -138,7 +123,7 @@ ALERT without temporal gating          & 0.72 & 0.73 & 0.72 \\
 
 \subsection{RQ6: Evidence-Coverage Risk Control and Temporal Shift}
 
-Calibrating the evidence threshold to $\alpha\in\{0.05,0.10,0.20\}$ yields omission risk 0.043/0.082/0.171 in random splits. The loss fires when a human-labeled High-risk pair with retrievable evidence is absent from the report, so the guarantee targets evidence omission, not severity correctness. A temporal split degrades modestly (appendix), motivating online calibration. To test dependence on GPT-4o prompting, we also re-run the full system with an open-weights Llama-3.1-70B+bge stack; absolute F1 drops but the ordering remains (Table~\ref{tab:robustness}), so we claim architectural robustness rather than prompt invariance.
+Calibrating the evidence threshold to $\alpha\in\{0.05,0.10,0.20\}$ yields omission risk 0.043/0.082/0.171 in random splits. The loss fires when a human-labeled High-risk pair with retrievable evidence is absent from the report, so the guarantee targets evidence omission, not severity correctness. Under a temporal split (2023--24 $\rightarrow$ 2025) the achieved risk rises to 0.061/0.113/0.196, exceeding the target at $\alpha{=}0.05$ and $0.10$ (Table~\ref{tab:risk_control_temporal}), which motivates rolling re-calibration. To test dependence on GPT-4o prompting, we also re-run the full system with an open-weights Llama-3.1-70B+bge stack; absolute F1 drops from 0.81 to 0.76 (Table~\ref{tab:robustness}) while the ranking over baselines is preserved, so we claim architectural robustness rather than prompt invariance.
 
 \subsection{Case Studies and Live Monitoring}
 

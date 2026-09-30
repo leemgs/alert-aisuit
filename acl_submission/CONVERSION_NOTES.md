@@ -58,6 +58,9 @@ adapted.
 ./gen_pdf.sh          # pdflatex + bibtex + pdflatex x2
 ```
 
+> **Update:** the paper now compiles cleanly and the body fits in 8 pages; see
+> `REVISION_NOTES.md`.
+
 The PDF could **not** be compiled in the automated environment that produced
 this conversion (the TeX package server used by the available toolchain is
 blocked by the egress policy). The source was verified statically instead: every

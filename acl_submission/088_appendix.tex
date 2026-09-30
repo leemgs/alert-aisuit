@@ -12,7 +12,7 @@
 
 \section*{Technical Appendix}
 
-This appendix supplements the main text with material that supports reproducibility but exceeds the page budget of the body. It contains the full 22-field schema, the ingestion-layer scoring matrix, formatted \texttt{History}/\texttt{Progress Notes} examples, open-source implementation details and configuration parameters of \texttt{ai-suit-tracker}, treatment-edge extraction accuracy, the schema-completeness/agentic-loop/retriever ablations, goal-predicate hyperparameters with agent prompt templates and evaluation-protocol notes, and the proof of Proposition~\ref{prop:termination} with the conformal calibration and temporal-shift audit.
+This appendix supplements the main text with material that supports reproducibility but exceeds the page budget of the body. It contains the full 22-field schema, the ingestion-layer scoring matrix, formatted \texttt{History}/\texttt{Progress Notes} examples, open-source implementation details and configuration parameters of \texttt{ai-suit-tracker}, treatment-edge extraction accuracy, full-test-set RQ1 results and the schema-completeness/agentic-loop/retriever ablations, goal-predicate hyperparameters with agent prompt templates and evaluation-protocol notes, and the proof of Proposition~\ref{prop:termination} with the conformal calibration and temporal-shift audit.
 
 \section{Full \texttt{ai-suit-sensing.csv} Schema}
 \label{app:full_schema}
@@ -199,8 +199,32 @@ Table~\ref{tab:edge_extraction} reports the per-relation accuracy of the treatme
 }
 \end{table}
 
-\section{Retriever Ablation (LegalRisk-RAG)}
+\section{Additional Results and Ablations}
 \label{app:retriever}
+
+\begin{table}[h]
+\centering
+\caption{Severity-label agreement on the full held-out test set, including retained pre-labels (RQ1; reported for scale). B5 is compute-matched to ALERT's mean iteration budget.}
+\label{tab:rq1}
+\small
+\resizebox{\columnwidth}{!}{%
+\begin{tabular}{lccc}
+\toprule
+\textbf{System} & \textbf{F1} & \textbf{Precision} & \textbf{Recall} \\
+\midrule
+B1 Rule-Based              & $0.62 \pm 0.02$ & $0.58 \pm 0.03$ & $0.67 \pm 0.02$ \\
+B2 Single-Pass LLM         & $0.72 \pm 0.02$ & $0.74 \pm 0.02$ & $0.70 \pm 0.03$ \\
+B3 RAG-only                & $0.74 \pm 0.02$ & $0.75 \pm 0.02$ & $0.72 \pm 0.02$ \\
+B4 Single-Agent            & $0.76 \pm 0.02$ & $0.77 \pm 0.02$ & $0.75 \pm 0.02$ \\
+B5 Self-Refinement         & $0.77 \pm 0.02$ & $0.78 \pm 0.02$ & $0.76 \pm 0.02$ \\
+\textbf{ALERT Full}        & $\mathbf{0.81 \pm 0.01}$ & $\mathbf{0.82 \pm 0.02}$ & $\mathbf{0.80 \pm 0.02}$ \\
+\bottomrule
+\end{tabular}%
+}
+\end{table}
+
+
+Table~\ref{tab:rq1} reports severity-label agreement on the full held-out test set (RQ1); primary claims use the human-adjudicated subset (Table~\ref{tab:human_only_main}).
 
 Table~\ref{tab:schema_completeness} reports schema completeness and record creation time across three conditions (unstructured baseline, manual CSV entry, and ALERT-automated CSV), corresponding to the RQ4 operational result in the main text.
 
@@ -345,46 +369,23 @@ Full prompt templates are released alongside the open-source implementation. The
 
 \textbf{Likert evaluation.} Two legal specialists, blind to system identity, rated 75 reports (15 per condition) on a 5-point scale across five dimensions. Reports were presented in randomized order; system identifiers were stripped.
 
-\textbf{Statistical tests.} F1 differences in Table~\ref{tab:rq1} are evaluated by a paired bootstrap test ($10{,}000$ resamples). Likert differences in RQ2 use the Wilcoxon signed-rank test on per-report mean ratings.
+\textbf{Statistical tests.} F1 differences in Tables~\ref{tab:human_only_main} and~\ref{tab:rq1} are evaluated by a paired bootstrap test ($10{,}000$ resamples). Likert differences in RQ2 use the Wilcoxon signed-rank test on per-report mean ratings.
 
 \section{Proof of Proposition~\ref{prop:termination} and Calibration Protocol}
 \label{app:theory}
 
-Table~\ref{tab:human_only} reports risk classification on the human-adjudicated subset only ($n{=}400$), serving as the primary circularity check by excluding retained pre-labels (RQ1 in the main text).
-Table~\ref{tab:risk_control_temporal} reports evidence-omission risk under random and temporal calibration splits, confirming that calibrated thresholds meet the specified budget $\alpha$ while showing that exchangeability is stressed under temporal shift (RQ6).
-Table~\ref{tab:robustness} confirms that the accuracy ordering is preserved when the GPT-4o backbone is replaced by an open-weights stack, indicating that gains stem from the goal predicate and temporal graph rather than a single proprietary model.
+Table~\ref{tab:risk_control_temporal} reports evidence-omission risk under random and temporal calibration splits: calibrated thresholds meet the budget $\alpha$ on random splits, while the temporal split exceeds it at $\alpha\in\{0.05,0.10\}$, showing that exchangeability is stressed under temporal shift (RQ6).
+Table~\ref{tab:robustness} reports full-system macro F1 and mean loop iterations when the GPT-4o backbone is replaced by an open-weights stack.
 
-% Tables A.7/A.8/A.9 are grouped in one float so LaTeX places them
+% The two tables below are grouped in one float so LaTeX places them
 % sequentially at the top of the column ([t!]).
 \begin{table}[t!]
 \centering
-% --- A.7 ---
-\caption{Risk classification on the \textbf{human-adjudicated subset only} ($n{=}400$), isolating any optimism from auto-retained pre-labels (RQ1).}
-\label{tab:human_only}
-\small
-\setlength{\tabcolsep}{4pt}
-\resizebox{\columnwidth}{!}{%
-\begin{tabular}{lccc}
-\toprule
-\textbf{System} & \textbf{F1} & \textbf{Precision} & \textbf{Recall} \\
-\midrule
-B1 (Rule-Based)       & $0.55 \pm 0.03$ & $0.52 \pm 0.04$ & $0.59 \pm 0.04$ \\
-B2 (Single-Pass LLM)  & $0.70 \pm 0.03$ & $0.72 \pm 0.03$ & $0.68 \pm 0.03$ \\
-B3 (RAG-only)         & $0.72 \pm 0.03$ & $0.73 \pm 0.03$ & $0.71 \pm 0.03$ \\
-B4 (Single-Agent)     & $0.74 \pm 0.02$ & $0.75 \pm 0.03$ & $0.73 \pm 0.03$ \\
-B5 (Self-Refinement)  & $0.75 \pm 0.02$ & $0.76 \pm 0.03$ & $0.74 \pm 0.03$ \\
-\textbf{ALERT (Full)} & $\mathbf{0.79 \pm 0.02}$ & $\mathbf{0.80 \pm 0.02}$ & $\mathbf{0.78 \pm 0.03}$ \\
-\bottomrule
-\end{tabular}%
-}
-
-\vspace{8pt}
-
-% --- A.8 ---
 \caption{Evidence-omission risk under random and temporal calibration splits. Lower is better; values should be read as evidence-coverage risk, not severity-label correctness.}
 \label{tab:risk_control_temporal}
 \small
 \setlength{\tabcolsep}{4pt}
+\resizebox{\columnwidth}{!}{%
 \begin{tabular}{lccc}
 \toprule
 \textbf{Split} & $\alpha=0.05$ & $\alpha=0.10$ & $\alpha=0.20$ \\
@@ -392,11 +393,11 @@ B5 (Self-Refinement)  & $0.75 \pm 0.02$ & $0.76 \pm 0.03$ & $0.74 \pm 0.03$ \\
 Random resplits & 0.043 & 0.082 & 0.171 \\
 Temporal 2023--24 $\rightarrow$ 2025 & 0.061 & 0.113 & 0.196 \\
 \bottomrule
-\end{tabular}
+\end{tabular}%
+}
 
 \vspace{8pt}
 
-% --- A.9 ---
 \caption{Robustness to model choice and run-to-run variance (full-system re-execution).}
 \label{tab:robustness}
 \small
@@ -423,12 +424,12 @@ Therefore, if every atom is attainable, $\Phi$ strictly decreases each iteration
 
 \subsection{Conformal Risk-Controlled Termination}
 We calibrate the evidence threshold $\tau$ (and, jointly, $k$) so that termination meets a user-specified omission-risk budget $\alpha$.
-Let the bounded loss $L_i(\tau)=\mathbf{1}[\text{a true High-risk theory is omitted from }R^*(c_i)]$ on calibration case $c_i$, $i=1,\dots,n$, and $\hat R_n(\tau)=\frac1n\sum_i L_i(\tau)$, which is non-increasing as $\tau$ decreases (more evidence admitted).
+For calibration cases $c_i$, $i=1,\dots,n$, let the bounded loss $L_i(\tau)$ indicate that a retrievable, human-labeled High-risk theory of $c_i$ is omitted from $R^*(c_i)$, and let $\hat R_n(\tau)=\frac1n\sum_i L_i(\tau)$, which is non-increasing as $\tau$ decreases (more evidence admitted).
 Following conformal risk control~\citep{angelopoulos2023conformalrisk}, choosing
 $\hat\tau=\inf\{\tau:\tfrac{n}{n+1}\hat R_n(\tau)+\tfrac{1}{n+1}\le\alpha\}$
 controls $\mathbb{E}[L_{n+1}(\hat\tau)]\le\alpha$ for an exchangeable test case under the calibration assumptions.
 For the joint $(k,\tau)$ we use a Learn-then-Test grid~\citep{angelopoulos2021ltt}, treating each configuration as a hypothesis and controlling the family-wise error via fixed-sequence testing.
-The achieved-vs-target risk and the induced risk--cost curve are reported in RQ6.
+The achieved-vs-target risk is reported in RQ6 and Table~\ref{tab:risk_control_temporal}.
 
 \subsection{Temporal-Split Evidence-Coverage Audit}
 \label{app:risk_control}
