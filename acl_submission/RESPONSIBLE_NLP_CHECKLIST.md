@@ -2,8 +2,7 @@
 
 Draft answers for the ARR submission form. Section numbers refer to the current
 `main.pdf`. The form's exact wording changes between cycles, so match each answer
-to the question IDs on the live form. Items marked **TODO** need facts that are
-not in the paper.
+to the question IDs on the live form.
 
 Answer to "Did you ...?" questions with **Yes / No / N/A** plus a section reference
 and, where useful, a one-line justification.
@@ -32,10 +31,10 @@ Uses artifacts: CourtListener/RECAP data, LegalBERT, GPT-4o, `text-embedding-3-l
 
 | Item | Answer | Where / justification |
 |---|---|---|
-| C1. Model size, compute budget, infrastructure? | **Partially — TODO** | Models are named (GPT-4o via API, Llama-3.1-70B, App. G/H). **Missing:** GPU type and hours for Llama-3.1-70B and the LegalBERT fine-tuning; API cost or number of calls for GPT-4o. Add a sentence to App. G or answer on the form. |
+| C1. Model size, compute budget, infrastructure? | **Partially** | App. G, *Models, compute, and software*: models and sizes named (GPT-4o via API; Llama-3.1-70B, 70B parameters; LegalBERT; embedding models). GPU hours and API cost were **not logged**; scale is indicated by mean 2.4 loop iterations per case (T_max = 5) and five test-set evaluation runs. Suggested form text: "We did not track GPU hours or API cost; App. G reports the models used and the per-case loop budget." |
 | C2. Experimental setup and hyperparameters? | **Yes** | App. G (hyperparameter table: *k*, τ, T_max, temperature, thresholds; prompt schematic; split protocol). |
 | C3. Descriptive statistics (error bars, number of runs)? | **Yes** | §6.2 (paired-bootstrap intervals, 10,000 resamples); App. G (5 seeds); App. H (mean ± std over runs). |
-| C4. Existing packages and their settings? | **Partially — TODO** | Models and APIs are named, but software libraries are not (BM25 implementation, re-ranker, conformal/bootstrap code). List them in App. D/G or answer on the form. |
+| C4. Existing packages and their settings? | **Yes** | App. G, *Models, compute, and software*: exact packages and versions are pinned in the dependency file of the released code; model settings in App. G (hyperparameter table). **Make sure the released code includes that dependency file.** |
 
 ## D. Human annotators / participants
 
@@ -47,7 +46,7 @@ Three legal research specialists adjudicated labels (§5.2); two specialists rat
 | D2. Recruitment and payment? | **Yes** | *Ethics Statement*: institution staff, work done within regular paid duties, no additional compensation. |
 | D3. Consent and how data would be used? | **Yes** | *Ethics Statement*: participants were told how their annotations would be used and agreed verbally. |
 | D4. Ethics review board approval? | **No** | *Ethics Statement*: not sought, because the work labeled public court documents and collected no personal information about participants. |
-| D5. Annotator demographics? | **No — TODO (optional)** | Only professional background is reported ("legal research specialists"). If available, add jurisdiction of legal training and years of experience. |
+| D5. Annotator demographics? | **No** | Only professional background is reported (legal research specialists, institution staff). Demographic data were not collected; with 3 annotators and 2 raters, detailed characteristics could also compromise anonymity. |
 
 ## E. AI assistants
 
@@ -55,9 +54,10 @@ Three legal research specialists adjudicated labels (§5.2); two specialists rat
 |---|---|---|
 | E1. Use of AI assistants reported? | **Yes** | *Ethics Statement*: used only to edit and polish the text; ideas, design, experiments and analyses are the authors'. |
 
-## Remaining TODOs before submitting
+## Before submitting
 
-1. **C1**: GPU type and hours (Llama-3.1-70B runs, LegalBERT fine-tuning) and GPT-4o usage (number of calls or cost).
-2. **C4**: software libraries and versions (BM25, re-ranker, bootstrap/conformal code).
-3. **D5** (optional): annotator background details.
-4. Confirm that the released guideline file and the dataset card state CC BY 4.0, and the code repository states MIT.
+All items have draft answers. Remaining actions:
+
+1. The released code must include a pinned dependency file (e.g. `requirements.txt`), since C4 points to it.
+2. Confirm that the dataset card states CC BY 4.0 and the code repository states MIT (B2).
+3. Copy the answers into the ARR form and check the item IDs against the current form.
