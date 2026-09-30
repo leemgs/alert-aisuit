@@ -81,7 +81,9 @@ A compiled `main.pdf` is included for convenience.
    compute, and software* paragraph (models named; GPU hours and API cost were not
    logged; package versions pinned in the released code's dependency file); D5 is
    answered "No" (demographics not collected). **Ship a pinned dependency file with
-   the released code.**
+   the released code:** a draft `requirements.txt` and a pinning script are in
+   `code_release/` (see its README); run the script in the experiment environment
+   and ship the generated `requirements.lock.txt`.
 5. ~~Anonymity~~ — **resolved in the paper.** Distinctive identifiers replaced for
    review via two macros in `main.tex`:
    `\trackername` = `alert-tracker` (was `ai-suit-tracker`) and

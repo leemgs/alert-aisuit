@@ -1,0 +1,49 @@
+# Dependencies for the ALERT code release.
+#
+# Section 1 is copied from the sensing tracker's existing, pinned
+# requirements file. Sections 2-4 are inferred from the components the
+# paper describes; their ">=" lower bounds are placeholders, NOT the
+# versions used in the experiments. Before release, run
+#
+#     python pin_requirements.py --code-dir <path-to-experiment-code>
+#
+# inside the environment that produced the paper's results. It writes
+# requirements.lock.txt with exact versions and reports any imported
+# package that is missing from this list. Ship the lock file.
+
+# --- 1. Sensing pipeline (pinned; from the tracker's requirements file) ---
+feedparser==6.0.11
+requests==2.32.3
+python-dateutil==2.9.0.post0
+PyYAML==6.0.2
+beautifulsoup4==4.12.3
+lxml==5.3.0
+pypdf==4.3.1
+
+# --- 2. LLM and embedding APIs (VERIFY) ---
+# GPT-4o controller/Analyzer/edge classifier; text-embedding-3-large
+openai>=1.30.0
+# Gemini text-embedding-004 (deduplication), Gemini Flash trend summary,
+# optional Imagen-3 brief. If the code uses the older SDK, replace with
+# google-generativeai.
+google-genai>=1.0.0
+
+# --- 3. Retrieval, re-ranking, and local models (VERIFY) ---
+# BM25 half of the hybrid retriever
+rank-bm25>=0.2.2
+# neural re-ranker and bge-large embeddings for the open-weights stack
+sentence-transformers>=2.7.0
+# LegalBERT fine-tuning on RECAP; Llama-3.1 needs transformers>=4.43
+transformers>=4.43.0
+torch>=2.2.0
+# If Llama-3.1-70B was served locally (e.g. with vLLM) or through a hosted
+# API, add that package here after checking the experiment environment.
+
+# --- 4. Evaluation and analysis (VERIFY) ---
+# macro P/R/F1; paired bootstrap; Wilcoxon signed-rank; conformal calibration
+numpy>=1.26.0
+scipy>=1.11.0
+scikit-learn>=1.3.0
+pandas>=2.0.0
+# temporal precedent graph (remove if the graph is not built with networkx)
+networkx>=3.1
