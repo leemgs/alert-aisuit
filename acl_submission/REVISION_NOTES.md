@@ -53,13 +53,11 @@ A compiled `main.pdf` is included for convenience.
 
 ## Action items for the authors (cannot be fixed by editing alone)
 
-1. **Edge-sensitivity table (Table 5) is internally ambiguous.** The extractor output
-   (which itself misses ~23% of closures, 0.77 recall) scores PLRE F1 0.78, while
-   "Mask 23% closures" scores 0.74. Reviewers will ask why the same miss rate gives
-   different results. Clarify whether masks are applied to *gold* closures or on top
-   of the extractor (the row "Mask 10% *additional*" suggests the latter), and, if
-   applicable, explain the gap (e.g., extractor misses concentrate on low-confidence
-   edges routed to human review).
+1. ~~Edge-sensitivity table (Table 5) ambiguity~~ — **resolved.** Authors confirmed
+   the masks are applied *on top of the extractor output*. Rows relabelled
+   ("+ mask x% of extracted"), an approximate effective-miss-rate column added
+   (1 − 0.77·(1 − x)), caption and RQ3 text rewritten, and the P2 appendix wording
+   aligned (23% = extractor's own miss rate, not a masking level). No numbers changed.
 2. **Backbone robustness.** The text claims the baseline ranking is preserved with
    Llama-3.1-70B + bge, but Table A (robustness) shows only ALERT. Add at least B3/B5
    under the open-weights stack, or soften the claim.
