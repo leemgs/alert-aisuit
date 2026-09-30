@@ -371,6 +371,8 @@ Full prompt templates are released alongside the open-source implementation. The
 
 \textbf{Statistical tests.} F1 differences in Tables~\ref{tab:human_only_main} and~\ref{tab:rq1} are evaluated by a paired bootstrap test ($10{,}000$ resamples). Likert differences in RQ2 use the Wilcoxon signed-rank test on per-report mean ratings.
 
+\textbf{Models, compute, and software.} The controller, Analyzer, and edge classifier use GPT-4o through its API; embeddings use \texttt{text-embedding-3-large} and, for deduplication only, Gemini \texttt{text-embedding-004}. The robustness re-run (Table~\ref{tab:robustness}) uses Llama-3.1-70B (70B parameters) with \texttt{bge-large}, and the retriever ablation uses LegalBERT fine-tuned on RECAP text. We did not log GPU hours or API cost. As an indication of scale, each case requires on average 2.4 loop iterations (at most $T_{\max}{=}5$), and the test-set evaluations use five runs (seeds as described above). Exact software packages and versions (BM25, re-ranker, bootstrap and conformal-calibration code) are pinned in the dependency file of the released code.
+
 \section{Proof of Proposition~\ref{prop:termination} and Calibration Protocol}
 \label{app:theory}
 

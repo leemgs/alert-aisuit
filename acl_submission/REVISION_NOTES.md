@@ -77,8 +77,11 @@ A compiled `main.pdf` is included for convenience.
    public filings, annotator recruitment/payment (institution staff, regular duties),
    verbal consent, why no ethics-board review was sought, and AI-assistant use
    (editing only). Draft form answers with section references are in
-   `RESPONSIBLE_NLP_CHECKLIST.md`. **Still TODO:** compute budget (C1), software
-   libraries (C4), optional annotator background (D5).
+   `RESPONSIBLE_NLP_CHECKLIST.md`. C1/C4/D5 answered: App. G now has a *Models,
+   compute, and software* paragraph (models named; GPU hours and API cost were not
+   logged; package versions pinned in the released code's dependency file); D5 is
+   answered "No" (demographics not collected). **Ship a pinned dependency file with
+   the released code.**
 5. ~~Anonymity~~ — **resolved in the paper.** Distinctive identifiers replaced for
    review via two macros in `main.tex`:
    `\trackername` = `alert-tracker` (was `ai-suit-tracker`) and
