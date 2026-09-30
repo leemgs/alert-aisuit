@@ -66,24 +66,24 @@ $-$ interval gating (flat similarity)     & 0.72 & $-6$ & 12.7 \\
 }
 \end{table}
 
-Table~\ref{tab:edge_sensitivity} masks negative-treatment closures before retrieval. The observed extractor is useful but not lossless: at the observed 23\% missed-closure level, stale-cite rate roughly doubles and PLRE F1 declines. ALERT therefore treats low-confidence negative edges as self-verification failures: they are blocked from automatic interval closure, trigger retrieval of independent treatment evidence, and are surfaced as unresolved legal-status atoms if the Goal Checker cannot satisfy coverage. This critique loop is what motivates the agentic structure: it localizes extractor uncertainty before it becomes an unqualified PLRE support claim.
+Table~\ref{tab:edge_sensitivity} measures how closure errors propagate. The extractor row already operates at the observed miss rate (about 23\% of gold closures, implied by 0.77 recall) and costs 2 PLRE F1 points relative to gold edges. Rows below additionally mask a random fraction of the \emph{extracted} closures before retrieval, simulating a weaker extractor: removing a further 23\% of extracted closures ($\approx$41\% effective miss rate) roughly doubles the stale-cite rate (4.1\%$\rightarrow$8.9\%) and lowers PLRE F1 by 4 points. ALERT therefore treats low-confidence negative edges as self-verification failures: they are blocked from automatic interval closure, trigger retrieval of independent treatment evidence, and are surfaced as unresolved legal-status atoms if the Goal Checker cannot satisfy coverage. This critique loop is what motivates the agentic structure: it localizes extractor uncertainty before it becomes an unqualified PLRE support claim.
 
 \begin{table}[t]
 \centering
-\caption{Edge-error propagation audit. Negative-treatment interval closures are randomly masked before retrieval; 23\% corresponds to the observed miss rate implied by 0.77 recall.}
+\caption{Edge-error propagation audit. ``Mask $x$\%'' rows randomly remove $x$\% of the negative-treatment closures produced by the extractor, on top of its own misses. Effective miss rate relative to gold closures is approximated as $1-0.77(1-x)$ from the extractor's 0.77 recall. $\Delta$F1 is relative to the extractor row.}
 \label{tab:edge_sensitivity}
 \small
 \setlength{\tabcolsep}{4pt}
 \resizebox{\columnwidth}{!}{%
-\begin{tabular}{l c c c}
+\begin{tabular}{l c c c c}
 \toprule
-\textbf{Closure setting} & \textbf{PLRE F1} & \textbf{$\Delta$F1} & \textbf{Stale-cite \%} \\
+\textbf{Closure setting} & \textbf{Eff.\ miss} & \textbf{PLRE F1} & \textbf{$\Delta$F1} & \textbf{Stale-cite \%} \\
 \midrule
-Gold negative edges            & 0.80 & +2 & 3.7 \\
-Extractor output               & 0.78 & --- & 4.1 \\
-Mask 10\% additional closures  & 0.76 & $-2$ & 6.2 \\
-Mask 23\% closures             & 0.74 & $-4$ & 8.9 \\
-Mask 30\% closures             & 0.72 & $-6$ & 11.3 \\
+Gold negative edges               & 0\%          & 0.80 & +2 & 3.7 \\
+Extractor output                  & $\approx$23\% & 0.78 & --- & 4.1 \\
+\,+ mask 10\% of extracted        & $\approx$31\% & 0.76 & $-2$ & 6.2 \\
+\,+ mask 23\% of extracted        & $\approx$41\% & 0.74 & $-4$ & 8.9 \\
+\,+ mask 30\% of extracted        & $\approx$46\% & 0.72 & $-6$ & 11.3 \\
 \bottomrule
 \end{tabular}%
 }
