@@ -165,3 +165,16 @@ A compiled `main.pdf` is included for convenience.
   supplement**, and send the few-shot prompt text if you want it in the appendix.
 - To keep 8 pages: Conclusion rewritten more compactly; duplicated sentences removed
   from Discussion and RQ6.
+- **W2 (labels favour gating by construction):** no distractor-free numbers exist, so
+  RQ5 and Limitations now say that PLRE labels encode temporal validity, that no
+  distractor-free comparison is reported, and that part of the gating gain may come
+  from rejecting stale distractors. **If computed later, report gated vs. flat F1 on
+  the subset without stale-authority distractors.**
+- **W3 (RQ1 setup):** B2–B5 use the same GPT-4o backbone and decoding settings as
+  ALERT; B5 is matched on iterations, not tokens; the training split is used only for
+  few-shot selection and threshold tuning (no LLM fine-tuning); adjudicators did not
+  see the pre-labeler's score; the 91% spot-check is flagged as lenient; the
+  human-adjudicated test size is disclosed as unreported (≈80 if spread evenly).
+  **If you know the exact test n, add it.**
+- To keep 8 pages: RQ4 moved to the appendix (still defined in §6.1); RQ3's
+  critique-loop explanation shortened to a pointer to §4.5.
