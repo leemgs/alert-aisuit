@@ -45,11 +45,11 @@ Two blinded legal specialists rated 75 randomized reports (15 each for ALERT and
 
 \subsection{RQ3: Agentic Loop and Temporal Graph Ablations}
 
-Because temporal precedent reasoning is the central claim, Table~\ref{tab:temporal_ablation} decomposes validity-interval gating and treatment-edge weighting. Removing treatment weighting and then interval gating each degrades PLRE F1; the full-vs-flat gap is 6 F1 points ($p<0.01$), and stale citations rise from 4.1\% to 12.7\%. The failure mode is exactly what Eq.~\eqref{eq:tpg_score} targets: flat retrieval can rank a lexically close but already-closed authority above a still-operative one, changing which evidence reaches the generator rather than merely adding a warning after generation. This is the paper's main methodological result.
+Because temporal precedent reasoning is the central claim, Table~\ref{tab:temporal_ablation} decomposes validity-interval gating and treatment-edge weighting. Removing treatment weighting and then interval gating each degrades PLRE F1. Only the full-vs-flat gap of 6 F1 points was tested for significance ($p<0.01$); the intermediate 3-point step is reported without an interval and should be read as directional. Stale citations rise from 4.1\% to 12.7\%. The failure mode is exactly what Eq.~\eqref{eq:tpg_score} targets: flat retrieval can rank a lexically close but already-closed authority above a still-operative one, changing which evidence reaches the generator rather than merely adding a warning after generation. This is the paper's main methodological result.
 
 \begin{table}[t]
 \centering
-\caption{Temporal precedent-graph ablation (main claim). Both mechanisms of Eq.~\eqref{eq:tpg_score} are removed in sequence; the bottom row recovers flat semantic similarity. Stale-cite measures citations to already-closed precedent ($t_q\!\ge\!e_v$).}
+\caption{Temporal precedent-graph ablation (main claim). Both mechanisms of Eq.~\eqref{eq:tpg_score} are removed in sequence; the bottom row recovers flat semantic similarity. Stale-cite measures citations to already-closed precedent ($t_q\!\ge\!e_v$). Only the full-vs-flat difference was significance-tested ($p<0.01$).}
 \label{tab:temporal_ablation}
 \small
 \setlength{\tabcolsep}{4pt}
@@ -97,11 +97,11 @@ As an operational check (not evidence of legal correctness), automated records f
 
 \subsection{RQ5: Product--Litigation Risk Entailment}
 
-PLRE is evaluated on anonymized AI product specs spanning five archetypes and 312 product-mapping cases, so it is an initial benchmark. Positive labels require a product attribute, a legal-risk theory, a query date, and time-valid supporting authority; negative labels include ordinary mismatches and stale-authority distractors. In Table~\ref{tab:plre_external}, ALERT reaches 0.78 F1 and outperforms all external baselines; removing temporal gating costs 6 points (decomposed in Table~\ref{tab:temporal_ablation}). Given its scale, we read this as evidence for the validity-gated formulation, not as coverage of all AI-product litigation.
+PLRE is evaluated on anonymized AI product specs spanning five archetypes and 312 product-mapping cases, so it is an initial benchmark. We report its scale at the case level; pair-level statistics (number of attribute--theory--date pairs, positive rate, share of stale-authority distractors) and a PLRE-specific inter-annotator agreement are not reported (the $\kappa$ in \S\ref{sec:dataset} is for severity labels). Positive labels require a product attribute, a legal-risk theory, a query date, and time-valid supporting authority; negative labels include ordinary mismatches and stale-authority distractors. In Table~\ref{tab:plre_external}, ALERT reaches 0.78 F1, 5--13 points above the external baselines; removing temporal gating costs 6 points (decomposed in Table~\ref{tab:temporal_ablation}). Because these comparisons carry no confidence intervals and the benchmark is small, we read them as directional evidence for the validity-gated formulation, not as coverage of all AI-product litigation.
 
 \begin{table}[t]
 \centering
-\caption{PLRE comparison including external legal-NLI/precedent-retrieval baselines. External baselines do not use ALERT's goal predicate or validity-interval closure.}
+\caption{PLRE comparison including external legal-NLI/precedent-retrieval baselines. External baselines do not use ALERT's goal predicate or validity-interval closure. Point estimates without confidence intervals.}
 \label{tab:plre_external}
 \small
 \setlength{\tabcolsep}{4pt}
