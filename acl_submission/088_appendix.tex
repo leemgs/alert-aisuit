@@ -57,6 +57,15 @@ Table~\ref{tab:full_schema} lists all 22 fields of \schemafile{}, with type, req
 }
 \end{table}
 
+\subsection{Inclusion Criteria and Case Unit}
+\label{app:inclusion}
+
+\textbf{Search.} Candidate dockets were retrieved from CourtListener/RECAP for January 2020--December 2025 by searching complaint, amended-complaint, and petition entries for combinations of three keyword families: (i) AI-training terms (e.g., AI training, model training, training data, dataset, LLM); (ii) legal-theory terms (e.g., copyright, DMCA, unauthorized, without permission, pirated, scraping); and (iii) source-specific terms for known data sources (e.g., shadow libraries, video datasets, music lyrics). Legal-news signals were used only to locate dockets, not as cases.
+
+\textbf{Screening.} A reviewer kept a docket only if the complaint puts the development, training, or deployment of an AI system at issue; keyword matches about unrelated software or data disputes were removed. Litigation type (Table~\ref{tab:dataset_annual}) is assigned afterwards from the recorded cause of action, which is why non-copyright categories (trade secret, other) appear.
+
+\textbf{Case unit.} One case corresponds to one docket. Deduplication removes repeated retrievals of the same docket (1{,}260 raw records to 1{,}247 cases) but does not merge related or consolidated dockets, so a single dispute litigated in several dockets contributes several cases. Counts should therefore be read as dockets, not as distinct disputes.
+
 Table~\ref{tab:dataset_annual} gives the raw annual ingestion counts by litigation type, before deduplication and quality screening.
 
 \begin{table}[h]
@@ -134,7 +143,7 @@ The \texttt{Progress Notes} field (field~20) uses Markdown \texttt{\#\#} headers
 \subsection{System Architecture and Discovery}
 
 Figure~\ref{fig:alert_arch} shows how the sensing pipeline feeds the agentic layer evaluated in the main text. ALERT's discovery layer ingests CourtListener/RECAP~\citep{courtlistener2023}, docket-backed legal-media signals, and keyword-filtered news. A two-stage deduplication module first matches docket IDs and titles, then optionally removes Gemini-embedding neighbors above cosine $0.85$ (Algorithm~\ref{alg:hybrid_dedup}, appendix). Detected filings populate the 22-field \schemafile{} schema by combining docket metadata, NER over complaint text, regex extraction for damages, and LLM summarization for the narrative fields.
-The ingestion and risk-scoring components are released as \trackername{} (anonymous review URL in the supplement).
+All code will be released, as described in Appendix~\ref{app:repro}.
 
 \begin{figure}[h]
 \centering
@@ -450,7 +459,7 @@ Each of the four agents (Planner, Retriever, Analyzer, Reporter) is invoked with
 \texttt{[GOAL CHECK]: \{unmet sub-conditions of G\}}\\
 \texttt{[OUTPUT FORMAT]: \{structured JSON schema\}}
 \end{mycodebox}
-Full prompt templates are released alongside the open-source implementation. The Goal Checker is implemented as deterministic rule evaluation over $R_t$ (no LLM call), making termination decisions auditable.
+The full prompt templates, including the few-shot examples of the treatment-edge classifier, are part of the code release (Appendix~\ref{app:repro}, \emph{Code and data release}). The Goal Checker is implemented as deterministic rule evaluation over $R_t$ (no LLM call), making termination decisions auditable.
 
 \subsection{Evaluation Protocol Notes}
 
@@ -459,6 +468,8 @@ Full prompt templates are released alongside the open-source implementation. The
 \textbf{Likert evaluation.} Two legal specialists, blind to system identity, rated 75 reports (the same 15 cases for each of the five conditions, so comparisons are paired by case) on a 5-point scale across five dimensions. Reports were presented in randomized order; system identifiers were stripped.
 
 \textbf{Statistical tests.} F1 differences in Tables~\ref{tab:human_only_main} and~\ref{tab:rq1} are evaluated by a paired bootstrap test ($10{,}000$ resamples). Likert differences in RQ2 use the Wilcoxon signed-rank test on per-case mean ratings; $p$-values are not corrected for multiple comparisons, and inter-rater agreement was not computed.
+
+\textbf{Code and data release.} We will release all code used for the reported results: the sensing pipeline (\trackername{}), treatment-edge extraction and graph construction, the PLRE annotation guidelines and evaluation scripts, and the agentic loop, together with the treatment-weight schedule $w(\cdot)$, prompt templates with few-shot examples, split files, seeds, and ALERT-Dataset (CC~BY~4.0; code under MIT). For review, an anonymized copy of the code and data is provided as supplementary material; the full public release will follow the review period.
 
 \textbf{Models, compute, and software.} The controller, Analyzer, and edge classifier use GPT-4o through its API; embeddings use \texttt{text-embedding-3-large} and, for deduplication only, Gemini \texttt{text-embedding-004}. The robustness re-run (Table~\ref{tab:robustness}) uses Llama-3.1-70B (70B parameters) with \texttt{bge-large}, and the retriever ablation uses LegalBERT fine-tuned on RECAP text. We did not log GPU hours or API cost. As an indication of scale, each case requires on average 2.4 loop iterations (at most $T_{\max}{=}5$), and the test-set evaluations use five runs (seeds as described above). Exact software packages and versions (BM25, re-ranker, bootstrap and conformal-calibration code) are pinned in the dependency file of the released code.
 
