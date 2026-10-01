@@ -1,12 +1,7 @@
 \section{Problem Formulation}
 \label{sec:formulation}
 
-Let $\mathcal{D}=\{d_1,\ldots,d_n\}$ be public litigation documents with metadata and text, and let $P$ be a product specification describing architecture, data provenance, modality, and deployment context. ALERT returns a structured report $R^*$ and mitigation candidates $G^*$:
-\begin{equation}
-  R^* = \arg\max_{R\in\mathcal{R}} \text{Quality}(R,\mathcal{D},P)
-  \;\;\text{s.t.}\;\; \mathcal{G}(R),
-\end{equation}
-Quality is operationalized in evaluation rather than optimized as a single loss: correctness by severity-label F1 (RQ1), actionability and clarity by blinded report ratings (RQ2), and evidence sufficiency by the coverage loss $L_\tau$ (RQ6); $\mathcal{G}$ is the auditable goal predicate below. The core difficulty is a domain gap: product specifications use engineering terms (data pipelines, API distribution), whereas litigation documents use causes of action, procedural posture, and precedent. PLRE (\S\ref{sec:plre}) therefore requires mapping engineering-language attributes to legal-risk theories while conditioning the support set on authority valid at the query date.
+Let $\mathcal{D}=\{d_1,\ldots,d_n\}$ be public litigation documents with metadata and text, and let $P$ be a product specification describing architecture, data provenance, modality, and deployment context. ALERT returns a structured risk report $R^*$ and mitigation candidates $G^*$ that must satisfy an auditable goal predicate $\mathcal{G}$ (\S\ref{sec:goal_checker}). Report quality is not optimized directly; we evaluate it by severity-label F1 (RQ1), blinded report ratings (RQ2), and the coverage loss $L_\tau$ (RQ6). The core difficulty is a domain gap: product specifications use engineering terms (data pipelines, API distribution), whereas litigation documents use causes of action, procedural posture, and precedent. PLRE (\S\ref{sec:plre}) therefore requires mapping engineering-language attributes to legal-risk theories while conditioning the support set on authority valid at the query date.
 
 \subsection{Goal Predicate and Stopping Rule}
 \label{sec:goal_checker}
@@ -30,4 +25,4 @@ The first clause follows almost directly from the definitions: monotone caching 
 
 \subsection{Risk Scoring}
 
-The agentic layer scores risk as $\text{RiskScore}(d_i,P,C)=f_\theta(\phi(d_i),\psi(P),\chi(C))$, where $C$ is precedent context retrieved by LegalRisk-RAG. The ingestion layer uses an additive scoring matrix (Table~\ref{tab:risk_matrix}, appendix) for real-time triage, with a critical-composite bonus when copyright and model-training evidence co-occur; this heuristic is treated as a baseline and never as ground truth.
+In the agentic layer, the Analyzer assigns each risk item a severity (High/Medium/Low), $\text{RiskScore}(d_i,P,C)$, by prompting the LLM backbone (App.~\ref{app:repro}) with litigation document $d_i$, product specification $P$, and the precedent context $C$ retrieved by LegalRisk-RAG (\S\ref{sec:legalrag}). The ingestion layer uses an additive scoring matrix (Table~\ref{tab:risk_matrix}, appendix) for real-time triage, with a critical-composite bonus when copyright and model-training evidence co-occur; this heuristic is treated as a baseline and never as ground truth.

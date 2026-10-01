@@ -178,3 +178,22 @@ A compiled `main.pdf` is included for convenience.
   **If you know the exact test n, add it.**
 - To keep 8 pages: RQ4 moved to the appendix (still defined in §6.1); RQ3's
   critique-loop explanation shortened to a pointer to §4.5.
+
+## Round-2 review follow-ups (text-only fixes 1–5)
+
+1. **W-D (framing):** title → *ALERT: Supersession-Aware Retrieval for Product–Litigation
+   Risk Entailment* (old title kept as a comment); abstract and Introduction ¶3 now lead
+   with the validated treatment layer (incl. citator micro-F1 0.81) and call the gate
+   deliberately simple.
+2. **W-B (B5 naming):** "compute-matched" → "iteration-matched" everywhere; Discussion
+   now says B5 rules out extra refinement passes but not extra LLM calls.
+   **If you can report LLM calls/tokens per case for ALERT and B5, add them.**
+3. **W-G (decorative formalism):** removed the unused arg max objective; RiskScore is
+   now described concretely (LLM-backbone severity assignment from d_i, P, C).
+4. **W-I (related work):** LegalBench (Guha et al., 2023) and legal-RAG hallucination
+   audits (Dahl et al., 2024; Magesh et al., 2024) added to *Legal NLP and entailment*.
+   **Please verify these two new bib entries.**
+5. **W-J (minor):** Table 3 "±" now "half-widths of paired-bootstrap confidence
+   intervals" (**add the confidence level, e.g. 95%, if known**); Table 2 caption no
+   longer lists empty status categories.
+- To keep 8 pages the Conclusion was shortened to two sentences.
