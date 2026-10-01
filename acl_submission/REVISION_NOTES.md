@@ -135,3 +135,17 @@ A compiled `main.pdf` is included for convenience.
   **If you can compute them later** (pair count, positive rate, distractor share,
   test size, PLRE κ, bootstrap CIs for Tables 4/6), adding them would remove this
   weakness rather than just disclosing it.
+- **W4 (Proposition 1 mostly definitional):** text now says the termination clause
+  follows almost directly from the definitions and that attainable progress (A2) is
+  an unverified design assumption (appendix no longer claims the mean iteration
+  count "validates" it); the conformal clause is named as a standard application,
+  limited to exchangeable cases and violated by the temporal split at α ∈ {0.05,
+  0.10}; "retrievable" is defined (supported by ≥1 authority valid at t_q in D);
+  calibration-set size is disclosed as unreported. **If you know n, add it.**
+- **W5 (RQ2 weak):** RQ2 now states the comparison is paired by case (same 15 cases
+  per system), that p-values are uncorrected for 20 comparisons, and that
+  inter-rater agreement was not computed; appendix and Limitations aligned.
+  Typo "Clarity. on a 5-point scale" fixed.
+- To keep 8 pages: case study / live-monitoring subsection moved to App. D; the
+  Conclusion's open-problems sentence now points to Limitations; Discussion
+  "Construct validity" tightened.

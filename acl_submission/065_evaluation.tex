@@ -41,7 +41,7 @@ B5 Self-Refinement   & $0.75 \pm 0.02$ & $0.76 \pm 0.03$ & $0.74 \pm 0.03$ & $0.
 
 \subsection{RQ2: Report Quality}
 
-Two blinded legal specialists rated 75 randomized reports (15 each for ALERT and B2--B5) on Accuracy, Completeness, Actionability, Evidence Sufficiency, and Clarity. on a 5-point scale. ALERT scores 4.3/4.1/4.2/4.4/3.9, with significant gains over all baselines (Wilcoxon signed-rank, $p<0.05$); the largest gain is in Evidence Sufficiency. Given the two-rater sample, we treat RQ2 as supporting evidence only.
+Two blinded legal specialists rated the reports of ALERT and B2--B5 for the same 15 cases (75 reports) on 5-point Accuracy, Completeness, Actionability, Evidence Sufficiency, and Clarity scales. ALERT scores 4.3/4.1/4.2/4.4/3.9; case-paired Wilcoxon signed-rank tests give $p<0.05$ against every baseline, with the largest gain in Evidence Sufficiency. With 15 pairs per test, no correction for the 20 comparisons, and no inter-rater agreement, RQ2 is supporting evidence only.
 
 \subsection{RQ3: Agentic Loop and Temporal Graph Ablations}
 
@@ -124,7 +124,3 @@ ALERT without temporal gating          & 0.72 & 0.73 & 0.72 \\
 \subsection{RQ6: Evidence-Coverage Risk Control and Temporal Shift}
 
 Calibrating the evidence threshold to $\alpha\in\{0.05,0.10,0.20\}$ yields omission risk 0.043/0.082/0.171 in random splits. The loss fires when a human-labeled High-risk pair with retrievable evidence is absent from the report, so the guarantee targets evidence omission, not severity correctness. Under a temporal split (2023--24 $\rightarrow$ 2025) the achieved risk rises to 0.061/0.113/0.196, exceeding the target at $\alpha{=}0.05$ and $0.10$ (Table~\ref{tab:risk_control_temporal}), which motivates rolling re-calibration. To probe dependence on GPT-4o, we re-run the full system with an open-weights Llama-3.1-70B+bge stack: it runs unchanged, with macro F1 dropping from 0.81 to 0.76 and similar loop length (2.4 vs.\ 2.6 iterations; Table~\ref{tab:robustness}). We did not re-run the baselines on this stack, so this shows only that the pipeline transfers to an open-weights backbone, not that its advantage over baselines is backbone-independent.
-
-\subsection{Case Studies and Live Monitoring}
-
-Case studies illustrate mechanism behavior, not outcome prediction. In a held-out PLRE query about output-CMI risk, flat RAG ranked a lexically close authority whose interval had already closed; validity gating removed it from support and promoted a still-operative authority, preventing a stale-citation report. In 30 days, \trackername{} processed 1{,}159 items, surfaced 94 unique filings after 92\% deduplication, and reached discovery-layer Precision 0.90/Recall 0.84.
