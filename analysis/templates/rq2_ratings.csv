@@ -1,0 +1,4 @@
+case_id,system,rater,dimension,score
+c0,B2,r1,Accuracy,4
+c0,B2,r2,Accuracy,3
+c0,B2,r1,Completeness,4

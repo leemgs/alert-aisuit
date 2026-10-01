@@ -197,3 +197,15 @@ A compiled `main.pdf` is included for convenience.
    intervals" (**add the confidence level, e.g. 95%, if known**); Table 2 caption no
    longer lists empty status categories.
 - To keep 8 pages the Conclusion was shortened to two sentences.
+
+## Numbers tooling (analysis/)
+
+`analysis/compute_review_stats.py` computes every statistic still missing (W-A–W-F,
+W1–W5) from exported CSVs and emits LaTeX macros; see `analysis/README.md`.
+Verified against scikit-learn/statsmodels/krippendorff/SciPy on synthetic data.
+
+**Correction:** an earlier edit estimated the human-adjudicated RQ1 test size as
+"about 80"; that estimate was removed. The original AAAI appendix states the
+human-only table used **n = 400**, i.e. all human-adjudicated cases, which exceeds
+the 20% test split. Confirm whether any of those 400 were in the train/validation
+split used for few-shot examples or thresholds (the script's RQ1 section checks this).
