@@ -209,3 +209,29 @@ Verified against scikit-learn/statsmodels/krippendorff/SciPy on synthetic data.
 human-only table used **n = 400**, i.e. all human-adjudicated cases, which exceeds
 the 20% test split. Confirm whether any of those 400 were in the train/validation
 split used for few-shot examples or thresholds (the script's RQ1 section checks this).
+
+## Verification and packaging pass
+
+- **Bibliography verified** against publisher/ACL Anthology/proceedings pages for all
+  entries added in this revision and the uncertain originals. Fixes:
+  - `louis2023statutory` ("Statutory Reasoning Assessment with a Faithful Explanations
+    Dataset", Louis & Spanakis, EACL 2023) **could not be found and appears not to
+    exist**; replaced by the verified SARA paper (Holzenberger et al., NLLP 2020) for the
+    "statutory reasoning" citation. **Please confirm this is the work you meant.**
+  - `kosari_meta_2024` (Kosari v. Meta, 3:24-cv-04722) **could not be verified**; replaced
+    in the `\nocite` list by the verified Kadrey v. Meta (3:23-cv-03417, N.D. Cal.).
+    **If Kosari is a real docket, restore it with a working CourtListener URL.**
+  - Sadeghian et al. title corrected ("Semantic Edge Labeling over Legal Citation
+    Graphs"); Magesh et al. updated to JELS 22(2):216–242 (2025); Conformal Risk Control
+    to ICLR 2024; Wang et al. agent survey to an @article (Frontiers of CS 18(6));
+    StreamingQA/RealTime QA pages and the Campos et al. DOI added; case-name
+    capitalization and "Significant Gravitas" author rendering fixed.
+- **Proofreading:** appendix overview rewritten to match the restructured appendix;
+  stale "(main text)" / "(Algorithm 1, appendix)" phrases fixed.
+- **Checklist:** section references updated (B1, B5, B6); E1 note added for the
+  AI-written analysis scripts if they are used for reported numbers.
+- **Supplement:** `supplement/anonymize_supplement.py` builds and verifies the anonymized
+  bundle (see `supplement/README.md`).
+- **Still for the authors:** (1) the n = 400 vs. 20% test-split question (RQ1);
+  (2) whether τ = 0.62 in the hyperparameter table is the pre-calibration default,
+  given that τ̂ is selected by conformal calibration (RQ6).
