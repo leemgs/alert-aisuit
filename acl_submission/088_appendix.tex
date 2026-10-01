@@ -12,7 +12,7 @@
 
 \section*{Technical Appendix}
 
-This appendix supplements the main text with material that supports reproducibility but exceeds the page budget of the body. It contains the full 22-field schema, the ingestion-layer scoring matrix, formatted \texttt{History}/\texttt{Progress Notes} examples, open-source implementation details and configuration parameters of \trackername{}, treatment-edge extraction accuracy, full-test-set RQ1 results and the schema-completeness/agentic-loop/retriever ablations, goal-predicate hyperparameters with agent prompt templates and evaluation-protocol notes, and the proof of Proposition~\ref{prop:termination} with the conformal calibration and temporal-shift audit.
+This appendix collects material that supports reproducibility but exceeds the page budget of the body: dataset inclusion criteria and statistics (App.~\ref{app:full_schema}), the ingestion-layer scoring matrix and record formats (App.~\ref{app:risk_matrix}--\ref{app:examples}), system architecture, a case study, and the sensing tool (App.~\ref{app:impl}), treatment-edge extraction accuracy (App.~\ref{app:edge_extraction}), additional results and ablations (App.~\ref{app:retriever}), hyperparameters, prompts, evaluation protocol, and the release plan (App.~\ref{app:repro}), the proof of Proposition~\ref{prop:termination} with the calibration audit (App.~\ref{app:theory}), and the validation protocols with measured P2 results (App.~\ref{app:protocols}).
 
 \section{Full \schemafile{} Schema}
 \label{app:full_schema}
@@ -93,7 +93,7 @@ Table~\ref{tab:dataset_annual} gives the raw annual ingestion counts by litigati
 \section{Ingestion-Layer Scoring Matrix}
 \label{app:risk_matrix}
 
-Table~\ref{tab:risk_matrix} lists the additive ingestion-layer scoring matrix (main text) used for real-time triage and as the automated pre-labeler. The critical-composite bonus fires only when copyright and model-training evidence co-occur. This heuristic is a baseline, never ground truth.
+Table~\ref{tab:risk_matrix} lists the additive ingestion-layer scoring matrix (\S\ref{sec:formulation}) used for real-time triage and as the automated pre-labeler. The critical-composite bonus fires only when copyright and model-training evidence co-occur. This heuristic is a baseline, never ground truth.
 
 \begin{table}[h]
 \centering
@@ -142,7 +142,7 @@ The \texttt{Progress Notes} field (field~20) uses Markdown \texttt{\#\#} headers
 
 \subsection{System Architecture and Discovery}
 
-Figure~\ref{fig:alert_arch} shows how the sensing pipeline feeds the agentic layer evaluated in the main text. ALERT's discovery layer ingests CourtListener/RECAP~\citep{courtlistener2023}, docket-backed legal-media signals, and keyword-filtered news. A two-stage deduplication module first matches docket IDs and titles, then optionally removes Gemini-embedding neighbors above cosine $0.85$ (Algorithm~\ref{alg:hybrid_dedup}, appendix). Detected filings populate the 22-field \schemafile{} schema by combining docket metadata, NER over complaint text, regex extraction for damages, and LLM summarization for the narrative fields.
+Figure~\ref{fig:alert_arch} shows how the sensing pipeline feeds the agentic layer evaluated in the main text. ALERT's discovery layer ingests CourtListener/RECAP~\citep{courtlistener2023}, docket-backed legal-media signals, and keyword-filtered news. A two-stage deduplication module first matches docket IDs and titles, then optionally removes Gemini-embedding neighbors above cosine $0.85$ (Algorithm~\ref{alg:hybrid_dedup}). Detected filings populate the 22-field \schemafile{} schema by combining docket metadata, NER over complaint text, regex extraction for damages, and LLM summarization for the narrative fields.
 All code will be released, as described in Appendix~\ref{app:repro}.
 
 \begin{figure}[h]
@@ -272,11 +272,11 @@ Debug                    & off            & Verbose logging \\
 \section{Treatment-Edge Extraction Accuracy}
 \label{app:edge_extraction}
 
-Table~\ref{tab:edge_extraction} reports the per-relation accuracy of the treatment-edge extractor (main text) against the hand-labeled gold span set. Negative-treatment edges (\textsc{supersedes}/\textsc{overrules}/material \textsc{narrows}) drive validity-interval closure and are reported separately from the high-frequency \textsc{cites} relation, with a micro-average over the three negative-treatment relations.
+Table~\ref{tab:edge_extraction} reports the per-relation accuracy of the treatment-edge extractor (\S\ref{sec:tpg}) against the hand-labeled gold span set. Negative-treatment edges (\textsc{supersedes}/\textsc{overrules}/material \textsc{narrows}) drive validity-interval closure and are reported separately from the high-frequency \textsc{cites} relation, with a micro-average over the three negative-treatment relations.
 
 \begin{table}[h]
 \centering
-\caption{Treatment-edge extraction accuracy against the hand-labeled gold span set (main text).}
+\caption{Treatment-edge extraction accuracy against the 600 hand-labeled gold citation spans (\S\ref{sec:tpg}).}
 \label{tab:edge_extraction}
 \small
 \setlength{\tabcolsep}{5pt}

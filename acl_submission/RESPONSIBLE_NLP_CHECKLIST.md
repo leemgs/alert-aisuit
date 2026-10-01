@@ -20,12 +20,12 @@ Uses artifacts: CourtListener/RECAP data, LegalBERT, GPT-4o, `text-embedding-3-l
 
 | Item | Answer | Where / justification |
 |---|---|---|
-| B1. Cited the creators of artifacts used? | **Yes** | §4.2–4.3 (CourtListener, LegalBERT, DPR); §6 (baselines); references. |
+| B1. Cited the creators of artifacts used? | **Yes** | §4.1–4.2 (CourtListener, LegalBERT, DPR); §6.1 (baselines); App. D.1; references. |
 | B2. License / terms of use discussed? | **Yes** | *Ethics Statement*: dataset CC BY 4.0, code MIT; source data used under CourtListener/RECAP terms; citator outputs used only as an evaluation reference under a licensed account (App. I.2). |
 | B3. Use consistent with intended use? | **Yes** | *Ethics Statement*: research on legal-risk analysis, decision support only; not for automated legal decisions. |
 | B4. Personally identifying info / offensive content? | **Yes** | *Ethics Statement*: records contain party and counsel names as they appear in public court filings; no other personal information is collected. |
-| B5. Documentation of artifacts (domain, language, coverage)? | **Yes** | §5 (coverage 2020–2025, litigation types, defendants); *Limitations* (U.S. federal, English only); App. A (schema). |
-| B6. Statistics (splits, sizes)? | **Yes** | §5 (Tables 1–2), §6.1 (70/10/20 split; 400 human-adjudicated, 847 retained pre-labels), §6.6 (312 PLRE cases). |
+| B5. Documentation of artifacts (domain, language, coverage)? | **Yes** | §5.1 and App. A.1 (coverage 2020–2025, inclusion criteria, case unit, defendants); *Limitations* (U.S. federal, English only, per-docket counting); App. A (schema, Table A.2). |
+| B6. Statistics (splits, sizes)? | **Yes** | §5.1 (Table 2), App. A (Table A.2), §6.1 (70/10/20 split; 400 human-adjudicated, 847 retained pre-labels), §6.5 (312 PLRE cases). |
 
 ## C. Computational experiments
 
@@ -52,7 +52,7 @@ Three legal research specialists adjudicated labels (§5.2); two specialists rat
 
 | Item | Answer | Where / justification |
 |---|---|---|
-| E1. Use of AI assistants reported? | **Yes** | *Ethics Statement*: used only to edit and polish the text; ideas, design, experiments and analyses are the authors'. |
+| E1. Use of AI assistants reported? | **Yes** | *Ethics Statement*: used only to edit and polish the text; ideas, design, experiments and analyses are the authors'. **If any reported statistic is computed with `analysis/compute_review_stats.py` (written with an AI assistant), extend the statement**, e.g.: "AI assistants also helped write statistical-analysis scripts, which we verified against standard libraries." |
 
 ## Before submitting
 
