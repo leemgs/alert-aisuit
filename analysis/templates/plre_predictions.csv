@@ -1,0 +1,4 @@
+pair_id,case_id,archetype,split,is_distractor,gold,system,pred,stale_cite
+p0,c0,A0,test,0,0,cosine,1,0
+p0,c0,A0,test,0,0,LegalBERT-NLI,1,0
+p0,c0,A0,test,0,0,COLIEE-retrieval,0,0
