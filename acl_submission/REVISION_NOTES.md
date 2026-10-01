@@ -149,3 +149,19 @@ A compiled `main.pdf` is included for convenience.
 - To keep 8 pages: case study / live-monitoring subsection moved to App. D; the
   Conclusion's open-problems sentence now points to Limitations; Discussion
   "Construct validity" tightened.
+- **W10 (dataset construction):** new App. A.1 *Inclusion Criteria and Case Unit*
+  (retrospective RECAP keyword search over AI-training × legal-theory × data-source
+  term families, manual screening for AI development/training/deployment at issue,
+  litigation type assigned afterwards from the cause of action, one case = one
+  docket with consolidated actions not merged); one-sentence summary in §5.1;
+  Limitations notes per-docket counting over-represents multi-docket disputes.
+  Keyword families are described generically (exact query strings would match the
+  public tracker repository and break anonymity).
+- **W11 (reproducibility):** App. G *Code and data release* commits to releasing all
+  code (tracker, treatment-edge extraction and graph construction, PLRE evaluation,
+  agentic loop) plus w(·), prompts with few-shot examples, splits, seeds and the
+  dataset; an anonymized copy is supplementary material for review. §5.2 and App. D
+  aligned. **You must actually include the anonymized code and data in the
+  supplement**, and send the few-shot prompt text if you want it in the appendix.
+- To keep 8 pages: Conclusion rewritten more compactly; duplicated sentences removed
+  from Discussion and RQ6.
