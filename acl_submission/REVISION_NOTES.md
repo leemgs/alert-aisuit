@@ -117,3 +117,12 @@ A compiled `main.pdf` is included for convenience.
   citation-edge labeling (Sadeghian et al., 2018), and states plainly that the
   scoring function is simple and the contribution is the validated treatment layer.
   **Please verify the bibliographic details of these eight new entries.**
+- **W6 (operator is simple / w(·) unspecified):** contribution reframed from "a
+  retrieval mechanism" to "an extracted, citator-validated treatment layer";
+  §4.5 adds a *Why not a date filter?* paragraph (the end of a validity interval is
+  set by later documents and must be inferred from treatment edges, so a date
+  filter cannot express it); Discussion and Conclusion aligned. To stay within 8
+  pages, duplicated passages were removed (Discussion "Error propagation",
+  Background "Why time matters" / "Decision-support boundary"; the same content
+  remains in §4.5, RQ3, Introduction, Related Work and Ethics).
+  **Still open:** the exact w(·) values — send them and they will be stated under Eq. 3.
