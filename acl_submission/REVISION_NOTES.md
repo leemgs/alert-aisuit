@@ -126,3 +126,12 @@ A compiled `main.pdf` is included for convenience.
   Background "Why time matters" / "Decision-support boundary"; the same content
   remains in §4.5, RQ3, Introduction, Related Work and Ethics).
   **Still open:** the exact w(·) values — send them and they will be stated under Eq. 3.
+- **W1 (PLRE under-specified):** no additional numbers are available, so reporting is
+  made explicit instead. RQ5 states that PLRE scale is case-level only and that
+  pair-level composition and a PLRE-specific κ are not reported (the κ in §5 is for
+  severity labels); RQ3 and the Table 4 caption say only the full-vs-flat gap was
+  significance-tested and the 3-point intermediate step is directional; Table 6 is
+  labeled as point estimates; Limitations lists the missing statistics.
+  **If you can compute them later** (pair count, positive rate, distractor share,
+  test size, PLRE κ, bootstrap CIs for Tables 4/6), adding them would remove this
+  weakness rather than just disclosing it.
