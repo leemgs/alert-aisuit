@@ -189,6 +189,10 @@ The ingestion and risk-scoring components are released as \trackername{} (anonym
 \label{fig:alert_arch}
 \end{figure}
 
+\subsection{Case Study and Live Monitoring}
+
+Case studies illustrate mechanism behavior, not outcome prediction. In a held-out PLRE query about output-CMI risk, flat RAG ranked a lexically close authority whose interval had already closed; validity gating removed it from support and promoted a still-operative authority, preventing a stale-citation report. In 30 days, \trackername{} processed 1{,}159 items, surfaced 94 unique filings after 92\% deduplication, and reached discovery-layer Precision 0.90/Recall 0.84.
+
 \subsection{Sensing Tool}
 
 
@@ -452,9 +456,9 @@ Full prompt templates are released alongside the open-source implementation. The
 
 \textbf{Dataset split.} The 70/10/20 train/validation/test split is stratified by year and litigation type and held fixed across all baselines (B1--B5 and ALERT (Full)). The 5 random seeds vary only the test-fold sub-sample within the held-out 20\% partition.
 
-\textbf{Likert evaluation.} Two legal specialists, blind to system identity, rated 75 reports (15 per condition) on a 5-point scale across five dimensions. Reports were presented in randomized order; system identifiers were stripped.
+\textbf{Likert evaluation.} Two legal specialists, blind to system identity, rated 75 reports (the same 15 cases for each of the five conditions, so comparisons are paired by case) on a 5-point scale across five dimensions. Reports were presented in randomized order; system identifiers were stripped.
 
-\textbf{Statistical tests.} F1 differences in Tables~\ref{tab:human_only_main} and~\ref{tab:rq1} are evaluated by a paired bootstrap test ($10{,}000$ resamples). Likert differences in RQ2 use the Wilcoxon signed-rank test on per-report mean ratings.
+\textbf{Statistical tests.} F1 differences in Tables~\ref{tab:human_only_main} and~\ref{tab:rq1} are evaluated by a paired bootstrap test ($10{,}000$ resamples). Likert differences in RQ2 use the Wilcoxon signed-rank test on per-case mean ratings; $p$-values are not corrected for multiple comparisons, and inter-rater agreement was not computed.
 
 \textbf{Models, compute, and software.} The controller, Analyzer, and edge classifier use GPT-4o through its API; embeddings use \texttt{text-embedding-3-large} and, for deduplication only, Gemini \texttt{text-embedding-004}. The robustness re-run (Table~\ref{tab:robustness}) uses Llama-3.1-70B (70B parameters) with \texttt{bge-large}, and the retriever ablation uses LegalBERT fine-tuned on RECAP text. We did not log GPU hours or API cost. As an indication of scale, each case requires on average 2.4 loop iterations (at most $T_{\max}{=}5$), and the test-set evaluations use five runs (seeds as described above). Exact software packages and versions (BM25, re-ranker, bootstrap and conformal-calibration code) are pinned in the dependency file of the released code.
 
@@ -507,7 +511,7 @@ By assumption (A1) \emph{monotone retrieval}, the evidence set attached to any i
 By assumption (A2) \emph{attainable progress}, whenever $\Phi(R_t)>0$ and at least one unmet atom is \emph{attainable} (the required evidence exists in $\mathcal{D}$), the Planner schedules it and the Retriever/Analyzer resolves it, giving $\Phi(R_{t+1})\leq\Phi(R_t)-1$.
 Therefore, if every atom is attainable, $\Phi$ strictly decreases each iteration until $\Phi=0$, i.e.\ $\mathcal{G}=\textsc{True}$, in at most $\Phi(R_0)$ steps. If some atom is unattainable, $\Phi$ cannot reach $0$; the loop runs to $T_{\max}$ and the Goal Checker reports the residual $\Phi(R_{T_{\max}})$ unmet atoms, which are exactly the items requiring human escalation. \hfill$\square$
 
-\noindent\textit{Remark.} (A1) holds by construction because \texttt{EXPANDQUERY} unions new hits with the prior evidence cache; (A2) is the design assumption that one tractable sub-goal is closed per pass, validated empirically by the mean iteration count (RQ3).
+\noindent\textit{Remark.} (A1) holds by construction because \texttt{EXPANDQUERY} unions new hits with the prior evidence cache; (A2) is the design assumption that one tractable sub-goal is closed per pass. We do not verify it directly; the mean iteration count (2.4, below $T_{\max}{=}5$) is consistent with it but does not establish it.
 
 \subsection{Conformal Risk-Controlled Termination}
 We calibrate the evidence threshold $\tau$ (and, jointly, $k$) so that termination meets a user-specified omission-risk budget $\alpha$.

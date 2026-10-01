@@ -18,7 +18,7 @@ ALERT treats report generation as goal-conditioned planning. The predicate is:
 \end{equation}
 where $\mathcal{G}_{\text{risk}}$ requires every risk item to have a severity label, $\mathcal{G}_{\text{evidence}}$ requires at least $k$ supporting documents above relevance threshold $\tau$, and $\mathcal{G}_{\text{guide}}$ requires mitigation text for each High or Medium item. The controller chooses among \textsc{Search}, \textsc{Analyze}, \textsc{Summarize}, \textsc{Map}, \textsc{Verify}, and \textsc{Report}; the deterministic (LLM-free) Goal Checker either terminates, emits a structured critique to close residual gaps, or escalates unmet conditions. For example, if a High-risk item has only one valid authority after gating, the critique records the missing theory, product attribute, jurisdiction, query date, and required evidence count; the Planner rewrites this into narrower precedent and entity queries rather than simply retrying the same prompt.
 
-Let $\Phi(R_t)$ count the unmet atomic sub-conditions of $\mathcal{G}$, let $\mathcal{T}^{\text{H}}_c$ be the retrievable High-risk theories of case $c$, and define the coverage loss at evidence threshold $\tau$ as
+Let $\Phi(R_t)$ count the unmet atomic sub-conditions of $\mathcal{G}$, let $\mathcal{T}^{\text{H}}_c$ be the human-labeled High-risk theories of case $c$ that are \emph{retrievable}, i.e., supported by at least one authority in $\mathcal{D}$ that is valid at $t_q$, and define the coverage loss at evidence threshold $\tau$ as
 \begin{equation}
   L_\tau(c)=\mathbf{1}\bigl[\exists\,T\in\mathcal{T}^{\text{H}}_c:\ T\notin R^*\bigr].
 \end{equation}
@@ -26,7 +26,7 @@ Let $\Phi(R_t)$ count the unmet atomic sub-conditions of $\mathcal{G}$, let $\ma
 \label{prop:termination}
 Under monotone evidence caching and attainable progress, $\Phi(R_t)$ is non-increasing, reaches zero in at most $\Phi(R_0)$ successful progress steps when all atoms are attainable, and otherwise returns the residual atoms at $T_{\max}$. If $\hat\tau$ is selected on exchangeable calibration cases by conformal risk control, then the next-case omission risk satisfies $\mathbb{E}[L_{\hat\tau}]\le\alpha$.
 \end{proposition}
-The first clause is a bounded stopping-and-escalation property; the second is a statistical risk-control guarantee (proof and calibration procedure in Appendix~\ref{app:theory}). It controls evidence coverage under the calibration distribution---not severity-label correctness or robustness to future temporal shift.
+The first clause follows almost directly from the definitions: monotone caching means no satisfied atom becomes unmet, and attainable progress (each pass closes at least one attainable atom) is a design assumption that we do not verify directly. The second clause is a standard application of conformal risk control~\citep{angelopoulos2023conformalrisk} to $L_\tau$, which is monotone in $\tau$ (Appendix~\ref{app:theory}). It covers evidence coverage only, holds only for exchangeable cases---our temporal split violates it at $\alpha\in\{0.05,0.10\}$ (\S\ref{sec:evaluation})---and its tightness depends on the calibration-set size, which we do not report.
 
 \subsection{Risk Scoring}
 

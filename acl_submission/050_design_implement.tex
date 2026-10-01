@@ -2,7 +2,7 @@
 \label{sec:framework}
 \subsection{System Overview}
 
-ALERT has two layers. A sensing pipeline discovers AI-litigation filings in CourtListener/RECAP~\citep{courtlistener2023} and legal news and turns them into structured case records; it is engineering infrastructure and is documented in Appendix~\ref{app:impl} (architecture in Figure~\ref{fig:alert_arch}). This section describes the NLP components that the experiments evaluate: retrieval over legal text (\S\ref{sec:legalrag}), the agentic loop (\S\ref{sec:agentic_loop}), the temporal authority gate (\S\ref{sec:tpg}), and the PLRE task (\S\ref{sec:plre}).
+ALERT has two layers. A sensing pipeline discovers AI-litigation filings in CourtListener/RECAP~\citep{courtlistener2023} and legal news and turns them into structured case records; it is engineering infrastructure and is documented in Appendix~\ref{app:impl} (architecture in Figure~\ref{fig:alert_arch}). Below we describe the evaluated NLP components (\S\ref{sec:legalrag}--\ref{sec:plre}).
 
 \subsection{LegalRisk-RAG}
 \label{sec:legalrag}
