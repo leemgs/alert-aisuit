@@ -1,1 +1,4 @@
 .env
+acl_submission/camera_ready.tex
+acl_submission/main-preprint.*
+acl_submission/main-final.*

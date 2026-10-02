@@ -235,3 +235,18 @@ split used for few-shot examples or thresholds (the script's RQ1 section checks 
 - **Still for the authors:** (1) the n = 400 vs. 20% test-split question (RQ1);
   (2) whether τ = 0.62 in the hyperparameter table is the pre-calibration default,
   given that τ̂ is selected by conformal calibration (RQ6).
+
+## Submission-readiness pass
+
+- **Build modes:** `./gen_pdf.sh` (anonymous review, default), `./gen_pdf.sh preprint`,
+  `./gen_pdf.sh final`. The last two require `camera_ready.tex` (template:
+  `camera_ready.tex.example`, git-ignored) for the author block and real artifact
+  names; all three modes were built and checked.
+- **Dataset card:** `supplement/DATASET_CARD.md`, from paper facts only, TODOs marked.
+- **Author response:** `acl_submission/REBUTTAL_PREP.md`, draft answers per anticipated
+  criticism; its placeholders match the macro names emitted by
+  `analysis/compute_review_stats.py`.
+- **Anonymity, highest priority:** this repository (`alert-aisuit`) is **public** and
+  contains the full paper, the AAAI version, and these notes, which name the
+  original identifiers. Anyone searching the title can find it. Make it private
+  (with the tracker/dashboard repositories) before submitting.

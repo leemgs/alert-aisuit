@@ -1,0 +1,9 @@
+% Copy to camera_ready.tex for preprint/final builds. Do NOT commit
+% camera_ready.tex to any repository linked from the anonymous submission.
+\author{
+  First Author \\ Affiliation \\ \texttt{email@example.com} \And
+  Second Author \\ Affiliation \\ \texttt{email@example.com}
+}
+% Restore the real artifact names if desired:
+% \renewcommand{\trackername}{\texttt{real-tracker-name}}
+% \renewcommand{\schemafile}{\texttt{real-schema-file.csv}}

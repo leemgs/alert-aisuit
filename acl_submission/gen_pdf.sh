@@ -1,17 +1,32 @@
 #!/usr/bin/env bash
-# Build the ACL (ACL Rolling Review) version of the ALERT paper.
+# Build the ALERT paper.
 #
-# Requires a TeX Live installation (pdflatex + bibtex). On Overleaf, just set
-# the main document to main.tex; the toolchain below is what Overleaf runs.
+#   ./gen_pdf.sh            anonymous review version  -> main.pdf
+#   ./gen_pdf.sh preprint   non-anonymous preprint    -> main-preprint.pdf
+#   ./gen_pdf.sh final      camera-ready              -> main-final.pdf
 #
-# Usage:  ./gen_pdf.sh
+# preprint/final require camera_ready.tex (copy camera_ready.tex.example).
+# Requires TeX Live (pdflatex + bibtex). On Overleaf, set main.tex as the
+# main document; it builds the review version by default.
 set -euo pipefail
 
-MAIN=main
+MODE="${1:-review}"
+case "$MODE" in
+  review|preprint|final) ;;
+  *) echo "usage: $0 [review|preprint|final]" >&2; exit 2 ;;
+esac
+if [[ "$MODE" != review && ! -f camera_ready.tex ]]; then
+  echo "camera_ready.tex not found: copy camera_ready.tex.example and fill in authors." >&2
+  exit 1
+fi
 
-pdflatex -interaction=nonstopmode -halt-on-error "${MAIN}.tex"
-bibtex   "${MAIN}"
-pdflatex -interaction=nonstopmode -halt-on-error "${MAIN}.tex"
-pdflatex -interaction=nonstopmode -halt-on-error "${MAIN}.tex"
+JOB=main
+[[ "$MODE" != review ]] && JOB="main-$MODE"
+TEX="\\def\\aclmode{$MODE}\\input{main.tex}"
 
-echo "Built ${MAIN}.pdf"
+pdflatex -interaction=nonstopmode -halt-on-error -jobname="$JOB" "$TEX"
+bibtex   "$JOB"
+pdflatex -interaction=nonstopmode -halt-on-error -jobname="$JOB" "$TEX"
+pdflatex -interaction=nonstopmode -halt-on-error -jobname="$JOB" "$TEX"
+
+echo "Built ${JOB}.pdf ($MODE)"
