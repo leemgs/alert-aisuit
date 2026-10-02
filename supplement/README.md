@@ -32,3 +32,11 @@ negative test with an injected e-mail address and GitHub URL fails as intended.
 Gemini deduplication or trend modules). Run the tool on the code that produced the
 paper's results. Exact query strings in the code can still be matched against a
 public repository by search, so keep the original repositories private during review.
+
+## Dataset card
+
+`DATASET_CARD.md` documents ALERT-Dataset using only facts stated in the paper;
+fill in its TODO items, then copy it into the dataset folder you pass with
+`--src` so it ships inside the anonymized bundle. (Do not pass this `supplement/`
+folder itself: this README names the original identifiers, and the scan will
+correctly refuse to build.)

@@ -10,7 +10,10 @@
 \documentclass[11pt]{article}
 
 % ACL style (loads natbib, caption, hyperref, and line numbers in review mode).
-\usepackage[review]{acl}
+% Build mode: review (default, anonymous) | preprint | final.
+% Set by gen_pdf.sh; do not edit here.
+\providecommand{\aclmode}{review}
+\edef\loadacl{\noexpand\usepackage[\aclmode]{acl}}\loadacl
 
 % Standard fonts / encoding recommended by the ACL template.
 \usepackage{times}
@@ -60,8 +63,9 @@
 \usepackage{tikz}
 \usetikzlibrary{positioning,arrows.meta,fit,backgrounds,calc}
 
-% Anonymized artifact names for the review version. For the camera-ready,
-% restore the real names here (see REVISION_NOTES.md, which is not submitted).
+% Anonymized artifact names for the review version. For preprint/final
+% builds, camera_ready.tex (not committed; see camera_ready.tex.example)
+% may redefine them and supply the author block.
 \newcommand{\trackername}{\texttt{alert-tracker}}
 \newcommand{\schemafile}{\texttt{alert-sensing.csv}}
 
@@ -74,6 +78,7 @@
 % "Anonymous ACL submission" and hides the author block below.
 % ---------------------------------------------------------------
 \input{./001_title.tex}
+\def\reviewmode{review}\ifx\aclmode\reviewmode\else\input{./camera_ready.tex}\fi
 
 \begin{document}
 
