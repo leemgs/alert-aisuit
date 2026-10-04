@@ -1,0 +1,6 @@
+data/raw/
+data/work/
+runs/
+__pycache__/
+runs_dense.log
+runs_dense2.log

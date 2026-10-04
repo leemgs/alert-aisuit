@@ -52,7 +52,7 @@ Three legal research specialists adjudicated labels (§5.2); two specialists rat
 
 | Item | Answer | Where / justification |
 |---|---|---|
-| E1. Use of AI assistants reported? | **Yes** | *Ethics Statement*: used only to edit and polish the text; ideas, design, experiments and analyses are the authors'. **If any reported statistic is computed with `analysis/compute_review_stats.py` (written with an AI assistant), extend the statement**, e.g.: "AI assistants also helped write statistical-analysis scripts, which we verified against standard libraries." |
+| E1. Use of AI assistants reported? | **Yes** | *Ethics Statement*: used to edit and polish the text, and an AI coding assistant wrote the P1 pilot code (App. I.1) to a design frozen by the authors before any run; ideas, system design and the other experiments and analyses are the authors'. **If any reported statistic is computed with `analysis/compute_review_stats.py` (written with an AI assistant), extend the statement**, e.g.: "AI assistants also helped write statistical-analysis scripts, which we verified against standard libraries." |
 
 ## Before submitting
 

@@ -72,6 +72,16 @@ A compiled `main.pdf` is included for convenience.
    throughout (the protocols are not deposited in an external registry; if they
    are, e.g. on OSF, restore the term and add the link after review). Running P1
    remains the single experiment most likely to strengthen the paper.
+   **Update — P1 pilot run.** A gold-treatment pilot of slice (b) (overruled U.S.
+   Supreme Court precedent; CONAN 2022 table + CAP opinions; design frozen at
+   commit `08aea76f`) was implemented and run in `experiments/p1_pilot/`
+   (`RESULTS.md`). Verdict against the pre-fixed criterion: **does not support
+   transfer** (1 of 3 hosts). App. I.1 now reports it (Table `tab:p1_pilot`),
+   Limitations and Discussion state the result, and the Ethics Statement and
+   checklist E1 disclose that an AI coding assistant wrote the pilot code. Authors:
+   re-run `evaluate.py` and `sensitivity.py` before submission. Still open: the
+   extractor-treatment variant (needs ALERT's extractor, which is not in the
+   released code), slice (a), and ALERT's `w(·)`.
 4. ~~Responsible NLP checklist~~ — **drafted.** Ethics Statement now states the
    dataset/code licenses (CC BY 4.0 / MIT), source-data terms and personal names in
    public filings, annotator recruitment/payment (institution staff, regular duties),
