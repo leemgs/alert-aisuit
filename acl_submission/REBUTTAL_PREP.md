@@ -64,10 +64,16 @@ it will appear in the revision.
 
 ## 7. "Generality is untested" (W8, P1)
 
-> We agree and say so in Limitations. The transfer protocol (P1) is fully
-> specified in App. I.1, including acceptance criteria fixed in advance.
-> [If P1 has been run by the response period, report its pre-specified
-> endpoints exactly as defined there, including a failure on slice (b).]
+> We agree and say so in Limitations. P1 is fully specified in App. I.1, and we
+> ran a pilot of slice (b) on public data (overruled U.S. Supreme Court
+> precedent, gold closures) with a design frozen before any run. It did **not**
+> meet its pre-fixed criterion: the gate removed every stale case from the top 10
+> on all three hosts (BM25 −8.3, bge −5.5, LegalBERT −0.4 points; Holm p < 0.05),
+> with non-inferiority on controls, but nDCG@10 improved significantly only for
+> bge (+0.13 [+0.04, +0.27]). A post-hoc exclusion of four queries whose gold case
+> was itself overruled makes BM25 significant (+0.37 [+0.19, +0.57]); we report it
+> only as a sensitivity analysis. The full P1 (slice (a), extractor-treatment
+> variant) remains to be run.
 
 ## 8. "Inter-annotator agreement with three annotators" (W-E)
 

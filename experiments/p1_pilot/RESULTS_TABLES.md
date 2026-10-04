@@ -12,6 +12,7 @@ Share of post-closure queries (full overrulings) whose *ungated* ranking contain
 |---|---|---|
 | bm25 | 8.3% | 26.8% |
 | bge | 5.5% | 17.5% |
+| legalbert | 0.4% | 4.8% |
 
 ## Q2: effect of the gate (post-closure queries, full overrulings)
 
@@ -23,13 +24,16 @@ nDCG@10 in points (×100); stale@10 = share of queries with A in the top 10.
 | bm25 | indicator | 28.97 | 42.0% | 0.259 | 0.0% | 0.0% |
 | bge | ungated | 8.35 | 14.3% | 0.072 | 5.5% | 2.0% |
 | bge | indicator | 8.47 | 14.5% | 0.073 | 0.0% | 0.0% |
+| legalbert | ungated | 2.30 | 4.4% | 0.020 | 0.4% | 0.3% |
+| legalbert | indicator | 2.30 | 4.4% | 0.020 | 0.0% | 0.0% |
 
 ### Paired deltas (indicator − ungated), cluster bootstrap by pair, Holm across hosts
 
 | Host | ΔnDCG@10 [95% CI] | p (Holm) | Δstale@10 [95% CI] | p (Holm) | ΔnDCG per-query CI |
 |---|---|---|---|---|---|
-| bm25 | +0.09 [-0.58, +0.52] | 0.6570 | -8.3 [-10.7, -6.2] pts | <0.0001 | [-0.30, +0.42] |
+| bm25 | +0.09 [-0.58, +0.52] | 1.0000 | -8.3 [-10.7, -6.2] pts | <0.0001 | [-0.30, +0.42] |
 | bge | +0.13 [+0.04, +0.27] | <0.0001 | -5.5 [-7.1, -3.9] pts | <0.0001 | [+0.05, +0.23] |
+| legalbert | +0.00 [+0.00, +0.00] | 1.0000 | -0.4 [-0.8, -0.1] pts | 0.0344 | [+0.00, +0.00] |
 
 ## Non-inferiority on no-stale control queries (margin −0.5 nDCG points)
 
@@ -37,6 +41,7 @@ nDCG@10 in points (×100); stale@10 = share of queries with A in the top 10.
 |---|---|---|
 | bm25 | +0.089 [+0.035, +0.162] | yes |
 | bge | +0.020 [+0.000, +0.049] | yes |
+| legalbert | +0.000 [+0.000, +0.000] | yes |
 
 ## Pre-closure queries (gate should be inert for the gold case)
 
@@ -44,6 +49,7 @@ nDCG@10 in points (×100); stale@10 = share of queries with A in the top 10.
 |---|---|
 | bm25 | +0.177 [+0.075, +0.305] |
 | bge | +0.002 [+0.000, +0.007] |
+| legalbert | +0.027 [+0.000, +0.083] |
 
 ## Partial overrulings: treatment-weight sweep (post-closure queries)
 
@@ -59,8 +65,12 @@ ALERT's `w(·)` is not specified in the paper or released code, so a sweep is re
 | bge | 0.25 | 7.87 | +0.13 [+0.01, +0.28] |
 | bge | 0.5 | 7.87 | +0.13 [+0.01, +0.28] |
 | bge | 0.75 | 7.87 | +0.13 [+0.01, +0.28] |
+| legalbert | ungated | 0.83 | — |
+| legalbert | 0.25 | 0.83 | +0.00 [+0.00, +0.00] |
+| legalbert | 0.5 | 0.83 | +0.00 [+0.00, +0.00] |
+| legalbert | 0.75 | 0.83 | +0.00 [+0.00, +0.00] |
 
 ## Verdict against the pre-fixed acceptance criterion (DESIGN.md §7)
 
-Hosts meeting all conditions (ΔnDCG > 0 and Δstale < 0, both Holm p < 0.05, NI on controls): **1 of 2** (bge).
+Hosts meeting all conditions (ΔnDCG > 0 and Δstale < 0, both Holm p < 0.05, NI on controls): **1 of 3** (bge).
 Pilot **does not support** transfer under the gold-treatment variant.

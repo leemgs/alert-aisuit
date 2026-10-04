@@ -25,6 +25,7 @@ python retrieve.py --host bm25
 ./run_dense.sh                      # bge (2 chunks) and legalbert (1 chunk), CPU
 python evaluate.py                  # -> results.json (10,000 bootstrap resamples)
 python report.py                    # -> RESULTS_TABLES.md
+python sensitivity.py               # post-hoc sensitivity (not pre-specified) -> sensitivity.json
 
 # 3. Tests
 python -m unittest test_p1.py
