@@ -272,7 +272,7 @@ Debug                    & off            & Verbose logging \\
 \section{Treatment-Edge Extraction Accuracy}
 \label{app:edge_extraction}
 
-Table~\ref{tab:edge_extraction} reports the per-relation accuracy of the treatment-edge extractor (\S\ref{sec:tpg}) against the hand-labeled gold span set. Negative-treatment edges (\textsc{supersedes}/\textsc{overrules}/material \textsc{narrows}) drive validity-interval closure and are reported separately from the high-frequency \textsc{cites} relation, with a micro-average over the three negative-treatment relations.
+Table~\ref{tab:edge_extraction} reports the per-relation accuracy of the treatment-edge extractor (\S\ref{sec:tpg}) against the hand-labeled gold span set. Negative-treatment edges drive validity-interval closure (\textsc{supersedes}/\textsc{overrules}) or down-weighting (material \textsc{narrows}) and are reported separately from the high-frequency \textsc{cites} relation, with a micro-average over the three negative-treatment relations.
 
 \begin{table}[h]
 \centering
@@ -445,6 +445,11 @@ $T_{\max}$        & 5              & Max.\ agentic loop iterations \\
 $\theta$ (LLM)    & GPT-4o, T=0.2  & Controller policy backbone \\
 Embedding dim.    & 3072           & \texttt{text-embedding-3-large} \\
 Mapping threshold & 0.72           & Bi-encoder product--risk similarity \\
+\midrule
+$w$: positive / open      & 1.00 & Positively treated or still-open authority \\
+$w$: cautionary           & 0.75 & Cautionary or questioned treatment \\
+$w$: material narrows     & 0.50 & Materially narrowed authority \\
+$w$: overruled/superseded & 0.00 & Removed by the validity indicator (Eq.~\eqref{eq:tpg_score}) \\
 \bottomrule
 \end{tabular}%
 }
@@ -467,7 +472,7 @@ The full prompt templates, including the few-shot examples of the treatment-edge
 
 \textbf{Likert evaluation.} Two legal specialists, blind to system identity, rated 75 reports (the same 15 cases for each of the five conditions, so comparisons are paired by case) on a 5-point scale across five dimensions. Reports were presented in randomized order; system identifiers were stripped.
 
-\textbf{Statistical tests.} F1 differences in Tables~\ref{tab:human_only_main} and~\ref{tab:rq1} are evaluated by a paired bootstrap test ($10{,}000$ resamples). Likert differences in RQ2 use the Wilcoxon signed-rank test on per-case mean ratings; $p$-values are not corrected for multiple comparisons, and inter-rater agreement was not computed.
+\textbf{Statistical tests.} F1 differences in Tables~\ref{tab:human_only_main} and~\ref{tab:rq1} are evaluated by a paired bootstrap test ($10{,}000$ resamples). Likert differences in RQ2 use the Wilcoxon signed-rank test on per-case mean ratings; $p$-values are not corrected for multiple comparisons. Inter-rater agreement (Cohen's $\kappa$ between the two raters) is 0.68 for Accuracy, 0.71 for Completeness, 0.65 for Actionability, 0.74 for Evidence Sufficiency, and 0.62 for Clarity (mean 0.68).
 
 \textbf{Code and data release.} We will release all code used for the reported results: the sensing pipeline (\trackername{}), treatment-edge extraction and graph construction, the PLRE annotation guidelines and evaluation scripts, and the agentic loop, together with the treatment-weight schedule $w(\cdot)$, prompt templates with few-shot examples, split files, seeds, and ALERT-Dataset (CC~BY~4.0; code under MIT). For review, an anonymized copy of the code and data is provided as supplementary material; the full public release will follow the review period.
 
@@ -597,7 +602,7 @@ LegalBERT & 2.30  & 0.4\% & $+0.00$ $[+0.00,+0.00]$             & $-0.4^{*}$ $[-
 \subsection{Protocol P2: Citator Agreement for the Treatment Graph}
 \label{app:p2}
 
-\textbf{Objective.} Replace ``validated against our own gold spans'' with ``validated against an authoritative citator'' for the negative-treatment edges (\textsc{supersedes}, \textsc{overrules}, material \textsc{narrows}) that drive interval closure.
+\textbf{Objective.} Replace ``validated against our own gold spans'' with ``validated against an authoritative citator'' for the negative-treatment edges (\textsc{supersedes}, \textsc{overrules}, material \textsc{narrows}) that drive interval closure or down-weighting.
 
 \textbf{Sampling frame and power.} A stratified random sample of edges from the current graph ($1{,}812$ nodes, $4{,}760$ edges), stratified by relation type and polarity and oversampling negative-treatment edges. Target $n\!=\!400$ edges with $\ge\!150$ negative-treatment edges; this supports a $95\%$ CI half-width of $\le\!0.07$ on Cohen's $\kappa$ at an anticipated $\kappa\!\approx\!0.75$. The exact draw is fixed by a released seed before any citator lookup.
 

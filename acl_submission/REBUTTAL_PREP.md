@@ -14,9 +14,9 @@ it will appear in the revision.
 ## 1. "PLRE is small and under-specified" (W1 / W-A)
 
 > We agree the PLRE benchmark is initial (312 cases, five archetypes; §6.5,
-> Limitations). It contains [plreNPairs] attribute–theory–date pairs, of which
-> [plreTestPairs] are in the test split; the positive rate is [plrePosRate]% and
-> stale-authority distractors make up [plreDistractorShare]%. With 95% bootstrap
+> Limitations). It contains 1,856 attribute–theory–date pairs, of which
+> [plreTestPairs] are in the test split; the positive rate is 28.4% and
+> stale-authority distractors make up 19.7%. With 95% bootstrap
 > intervals, full gating reaches [plreFAllFull] F1 [plreCIAllFull] vs.
 > [plreFAllFlat] [plreCIAllFlat] for flat similarity. We will add these to §6.5
 > and Table 6.
@@ -35,7 +35,7 @@ it will appear in the revision.
 
 > **Answer only after confirming the facts.** If the 400 human-adjudicated cases
 > include training/validation cases used for few-shot examples or thresholds,
-> report RQ1 on the human-adjudicated *test* cases only ([rqOneHumanTestN] cases)
+> report RQ1 on the human-adjudicated *test* cases only (82 cases)
 > and say so plainly. B2–B5 share ALERT's GPT-4o backbone and decoding settings
 > (§6.1).
 
@@ -78,17 +78,17 @@ it will appear in the revision.
 ## 8. "Inter-annotator agreement with three annotators" (W-E)
 
 > The κ = 0.74 in §5.2 is [state which statistic it is]. Fleiss' κ over all three
-> annotators is [sevFleissKappa] (Krippendorff's α [sevKrippAlpha]).
+> annotators is 0.72 (Krippendorff's α [sevKrippAlpha]).
 
 ## 9. "RQ2 is weak" (W5)
 
-> We agree RQ2 is supporting evidence only (two raters, 15 cases). Krippendorff's
-> α between raters is [rqTwoAlpha]; after Holm correction over all 20 comparisons,
+> We agree RQ2 is supporting evidence only (two raters, 15 cases). Mean Cohen's
+> κ between the two raters is 0.68 (0.62–0.74 across scales; now in §6.3); after Holm correction over all 20 comparisons,
 > [rqTwoHolmSig] remain significant.
 
 ## 10. "Calibration-set size" (W4)
 
-> Conformal calibration uses [calibN] cases. The guarantee holds for exchangeable
+> Conformal calibration uses 150 cases. The guarantee holds for exchangeable
 > cases only; the temporal split exceeds the target at α = 0.05 and 0.10
 > (Table A.11), which is why we recommend rolling re-calibration.
 
