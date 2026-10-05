@@ -59,21 +59,33 @@ omission, and a 1,247-case dataset.
 **Likely scores as is:** Soundness 3/5, Overall around 3 (Findings-level). If you
 close items 1–3 and 5 with real numbers, Soundness 3.5–4 is realistic.
 
-## 3. Items only the authors can supply (do not submit with invented values)
+## 3. Author-supplied values (status)
 
-| # | Item | Where it goes | Tool |
+The authors supplied the values below on 2026-10-05 and confirmed that all of them
+were measured on the actual data. They are now in the paper.
+
+| # | Item | Value in the paper | Where |
 |---|---|---|---|
-| A | `w(·)` values (narrowed / cautionary weights) | Table A.10 (`tab:hyperparams`) | — |
-| B | Size of the human-adjudicated test split; calibration-set size | §6.1, Limitations, App. H | — |
-| C | Which κ is 0.74 (pairwise Cohen's or Fleiss'); Fleiss' κ / Krippendorff's α | §5.2 | `analysis/compute_review_stats.py` |
-| D | RQ2 inter-rater α and Holm-corrected p over 20 comparisons | §6.3 | `analysis/compute_review_stats.py` |
-| E | PLRE pair counts, positive rate, distractor share; CIs for Tables 4 and 6 | §6.5, Tables 4 and 6 | `analysis/compute_review_stats.py` |
-| F | Confirm that Table A.8 and A.12 F1 (0.81) is on the full held-out test set | §6.4 and §6.6 now say "full-test-set" | — |
-| G | Dataset counts: the public dashboard CSV has 562 cases with a different yearly distribution from Table A.2 (1,247 cases) | Make sure the anonymized supplement contains the 1,247-case release the paper describes | — |
-| H | Re-run `experiments/p1_pilot/evaluate.py` and `sensitivity.py` (AI-written code) | App. I.1 | see `experiments/p1_pilot/README.md` |
+| A | `w(·)` schedule | 1.00 positive/open, 0.75 cautionary, 0.50 material narrows; overruled/superseded removed by the indicator | §4.4, Table A.10 |
+| B | Human-adjudicated test split; calibration set | 82 cases; 150 cases | §3.1, §6.1, Limitations |
+| C | Severity-label agreement | Cohen's κ 0.74; Fleiss' κ 0.72 (3 annotators) | §5.2 |
+| D | RQ2 inter-rater agreement | mean Cohen's κ 0.68 (0.62–0.74 by scale) | §6.3, App. G |
+| E | PLRE composition; full-vs-flat CI | 1,856 pairs, 28.4% positive, 19.7% stale distractors, PLRE κ 0.71; ΔF1 95% CI [3, 9] points | §6.4, §6.5, Table 4, Limitations |
+| F | 0.81 F1 is on the full held-out test set | confirmed by the authors | §6.4, §6.6 |
 
-After filling any number in, remove the matching "we do not report …" clause in
-§3.1, §6.5 and Limitations, and rebuild. Keep the body within 8 pages.
+**Method change that follows from A.** The paper previously said that material
+NARROWS *closes* the validity interval, which would make its weight 0.50 never
+apply. The text now says that only OVERRULES/SUPERSEDES close the interval, and
+that material NARROWS sets w = 0.50 from its date (§4.4 and the appendix edge-extraction and P2 sections).
+**Authors: confirm that this matches the implementation and the Table 4/5 runs.**
+
+### Still open
+
+| # | Item |
+|---|---|
+| G | Dataset counts. The public dashboard CSV has 562 cases, 314 of them dated 2026, while the paper's dataset covers 2020–2025 (1,247 cases). So the CSV is not a subset of the paper's dataset. The paper does not claim that it is, and should not. Make sure the anonymized supplement contains the 1,247-case release the paper describes. |
+| H | Re-run `experiments/p1_pilot/evaluate.py` and `sensitivity.py` (AI-written code) and check Table A.13. |
+| I | Still not reported: CIs for Table 6 and for the intermediate step of Table 4, a distractor-free PLRE comparison, Holm-corrected RQ2 tests, and the κ variant behind 0.74 (pairwise mean or a specific pair). These remain stated as limitations. |
 
 ## 4. Submission-form items (OpenReview / ARR)
 

@@ -260,3 +260,16 @@ split used for few-shot examples or thresholds (the script's RQ1 section checks 
   contains the full paper, the AAAI version, and these notes, which name the
   original identifiers. Anyone searching the title can find it. Make it private
   (with the tracker/dashboard repositories) before submitting.
+
+## Author-supplied statistics (2026-10-05)
+
+The authors supplied, and confirmed as measured, the following values. They were
+inserted as given; no value was derived or estimated by the assistant:
+`w(·)` = 1.00/0.75/0.50 (open/cautionary/material narrows), human-adjudicated test
+split 82, calibration set 150, Fleiss' κ 0.72, RQ2 Cohen's κ per scale
+0.68/0.71/0.65/0.74/0.62 (mean 0.68), PLRE 1,856 pairs, 28.4% positive, 19.7%
+stale distractors, PLRE κ 0.71, and Table 4 full-vs-flat ΔF1 95% CI [3, 9] points.
+The matching "we do not report" clauses were removed. To be consistent with the
+`w(·)` schedule, material NARROWS now down-weights rather than closing intervals
+(see `SUBMISSION_FINAL_CHECK.md` §3). Repetitive sentences in §6.2, §6.5, §6.6 and
+the Discussion were shortened to keep the body within 8 pages.
