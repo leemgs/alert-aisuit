@@ -89,7 +89,7 @@ Extractor output                  & $\approx$23\% & 0.78 & --- & 4.1 \\
 }
 \end{table}
 
-Component ablations for the agentic loop confirm each part contributes: removing the Goal Checker, Planner, and Retriever query-expansion lowers risk-classification F1 from 0.81 to 0.76/0.78/0.79 respectively, and only query-expansion removal degrades retrieval (Recall@10 $0.84\!\rightarrow\!0.76$); details are in Table~\ref{tab:ablation}.
+Component ablations for the agentic loop confirm each part contributes: removing the Goal Checker, Planner, and Retriever query-expansion lowers full-test-set F1 from 0.81 to 0.76/0.78/0.79 respectively, and only query-expansion removal degrades retrieval (Recall@10 $0.84\!\rightarrow\!0.76$); details are in Table~\ref{tab:ablation}.
 
 \subsection{RQ5: Product--Litigation Risk Entailment}
 
@@ -119,4 +119,4 @@ ALERT without temporal gating          & 0.72 & 0.73 & 0.72 \\
 
 \subsection{RQ6: Evidence-Coverage Risk Control and Temporal Shift}
 
-Calibrating the evidence threshold to $\alpha\in\{0.05,0.10,0.20\}$ yields omission risk 0.043/0.082/0.171 in random splits. Under a temporal split (2023--24 $\rightarrow$ 2025) the achieved risk rises to 0.061/0.113/0.196, exceeding the target at $\alpha{=}0.05$ and $0.10$ (Table~\ref{tab:risk_control_temporal}), which motivates rolling re-calibration. To probe dependence on GPT-4o, we re-run the full system with an open-weights Llama-3.1-70B+bge stack: it runs unchanged, with macro F1 dropping from 0.81 to 0.76 and similar loop length (2.4 vs.\ 2.6 iterations; Table~\ref{tab:robustness}). We did not re-run the baselines on this stack, so this shows only that the pipeline transfers to an open-weights backbone, not that its advantage over baselines is backbone-independent.
+Calibrating the evidence threshold to $\alpha\in\{0.05,0.10,0.20\}$ yields omission risk 0.043/0.082/0.171 in random splits. Under a temporal split (2023--24 $\rightarrow$ 2025) the achieved risk rises to 0.061/0.113/0.196, exceeding the target at $\alpha{=}0.05$ and $0.10$ (Table~\ref{tab:risk_control_temporal}), which motivates rolling re-calibration. To probe dependence on GPT-4o, we re-run the full system with an open-weights Llama-3.1-70B+bge stack: it runs unchanged, with full-test-set macro F1 dropping from 0.81 to 0.76 and similar loop length (2.4 vs.\ 2.6 iterations; Table~\ref{tab:robustness}). We did not re-run the baselines on this stack, so this shows only that the pipeline transfers to an open-weights backbone, not that its advantage over baselines is backbone-independent.

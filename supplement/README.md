@@ -15,7 +15,7 @@ python supplement/anonymize_supplement.py \
 What it does:
 - copies each source into `build/supplement/<NAME>/`;
 - replaces known identifiers (`ai-suit-*`, `aisuit`, `leemgs`, `aigovsensing`,
-  `alert-aisuit`) with the anonymized names the paper uses (`alert-tracker`,
+  `alert-aisuit`, and the `By Gauss` column label) with the anonymized names the paper uses (`alert-tracker`,
   `alert-sensing`, and so on); add more with `--replace OLD=NEW`;
 - drops `.git`, caches, real `.env` files, and images and PDFs (screenshots often
   show account names; use `--keep-images` / `--keep-pdfs` after checking them);
