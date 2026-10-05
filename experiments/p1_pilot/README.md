@@ -7,14 +7,13 @@ Pilot of Protocol P1 (paper App. I.1) on public data. Design: `DESIGN.md`
 ## Steps
 
 ```bash
-# 1. Data (public; not committed; checksums in RESULTS.md)
+# 1. Data (public; not committed; checksums in checksums.txt)
+mkdir -p data/raw
 curl -L -o data/raw/GPO-CONAN-2022.pdf \
   https://www.govinfo.gov/content/pkg/GPO-CONAN-2022/pdf/GPO-CONAN-2022.pdf
 pdftotext -layout data/raw/GPO-CONAN-2022.pdf data/raw/conan.txt
-# cut the "Table of Supreme Court Decisions Overruled by Subsequent Decisions"
-# region (from its first column header up to "TABLE OF LAWS HELD UNCONSTITUTIONAL")
-# into data/raw/overruled_table.txt
-data/raw/download_cap.sh            # CAP U.S. Reports volumes 1-572 (CC0)
+python cut_table.py data/raw/conan.txt data/raw/overruled_table.txt   # sha256 in checksums.txt
+./download_cap.sh                   # CAP U.S. Reports volumes 1-572 (CC0)
 
 # 2. Pipeline
 python parse_conan.py               # -> data/pairs_raw.csv   (282 pairs)
@@ -36,3 +35,6 @@ Requirements: Python 3.10+, `numpy scipy scikit-learn torch transformers`
 
 `data/pairs_raw.csv`, `data/pairs.csv` and `data/pairs_excluded.csv` are
 committed; raw downloads, the corpus, embeddings and runs are not.
+
+The released testbed built from this pilot (queries, qrels, gold closures and a
+standalone scorer for any TREC run) is in `benchmarks/scotus_overruled/`.
