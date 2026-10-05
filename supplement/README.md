@@ -9,6 +9,8 @@ python supplement/anonymize_supplement.py \
   --src <path-to-graph/PLRE/agent-code>:alert \
   --src <path-to-dataset-release>:data \
   --src analysis:analysis --src code_release:code_release \
+  --src benchmarks/scotus_overruled:testbed --src experiments/p1_pilot:p1_pilot \
+  --exclude "data/raw/*" --exclude "data/work/*" --exclude "runs/*" \
   --out build/supplement --zip
 ```
 
