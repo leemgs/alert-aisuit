@@ -41,6 +41,9 @@ DEFAULT_REPLACEMENTS = [
     ("aisuit", "alert"),
     ("ai-suit", "alert"),
     ("ai_suit", "alert"),
+    # Dashboard CSV column "개요 및 배경 (By Gauss)": the model name can reveal affiliation.
+    (" (By Gauss)", " (LLM-generated)"),
+    ("By Gauss", "LLM-generated"),
 ]
 
 DEFAULT_EXCLUDES = [
