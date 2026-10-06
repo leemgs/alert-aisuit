@@ -115,3 +115,25 @@ Author checks; numbers are not changed here:
 | K | Calibration set of 150 cases | the loss uses human-labeled High-risk theories, but only 400 cases are human-adjudicated (82 in test). State which split the 150 come from and that they do not overlap the test cases |
 | L | Table 5 and P2 still describe NARROWS as a "closure" | after the w(·) change, material NARROWS down-weights rather than closes, while the 0.77 recall and the 20.4% missed-closure rate are micro-averages that include NARROWS. Either re-run on OVERRULES/SUPERSEDES only, or state that "closure" there includes down-weighting edges |
 | M | PLRE evaluation split | state whether Tables 4 and 6 use all 1,856 pairs or only test pairs |
+
+### Round-4 follow-up (2026-10-06)
+
+- **J (Table 3 CI):** the authors could not recompute it (no prediction CSV in
+  the repository), and a synthetic n = 82 run of `analysis/compute_review_stats.py`
+  gave about ±0.09–0.10. The ± columns were therefore **removed** from Table 3
+  and Table A.6 (A.6 had the same problem at n ≈ 249). Both tables now report
+  point estimates, and the caption and Limitations say so. Once the real
+  predictions are available, run the script and add back the F1 CIs and the
+  paired ΔF1 CI vs. B5 with its p-value.
+- **K (calibration):** stated as 150 cases from the human-adjudicated
+  training/validation pool, disjoint from the 82 test cases (author statement).
+- **L (NARROWS):** the wording changed instead of re-running. Table 5, P2, the
+  Discussion, Limitations and Ethics now speak of negative-treatment *actions*
+  (closure for OVERRULES/SUPERSEDES, down-weighting for material NARROWS). The
+  numbers are unchanged.
+- **M (PLRE split):** stated that Tables 4 and 6 are computed over all 1,856
+  pairs. Limitations notes that this includes the pairs used to set the
+  validation threshold. A reviewer may ask for held-out test-pair results.
+- To keep the body within 8 pages, some sentences in the Introduction, Background,
+  §4.5, §6.4, §6.6, Related Work and Conclusion were shortened without dropping
+  any claim.
