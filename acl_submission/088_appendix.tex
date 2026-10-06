@@ -533,9 +533,9 @@ Therefore, if every atom is attainable, $\Phi$ strictly decreases each iteration
 We calibrate the evidence threshold $\tau$ (and, jointly, $k$) so that termination meets a user-specified omission-risk budget $\alpha$.
 For calibration cases $c_i$, $i=1,\dots,n$, let the bounded loss $L_i(\tau)$ indicate that a retrievable, human-labeled High-risk theory of $c_i$ is omitted from $R^*(c_i)$, and let $\hat R_n(\tau)=\frac1n\sum_i L_i(\tau)$, which is non-increasing as $\tau$ decreases (more evidence admitted).
 Following conformal risk control~\citep{angelopoulos2023conformalrisk}, choosing
-$\hat\tau=\inf\{\tau:\tfrac{n}{n+1}\hat R_n(\tau)+\tfrac{1}{n+1}\le\alpha\}$
+$\hat\tau=\sup\{\tau:\tfrac{n}{n+1}\hat R_n(\tau)+\tfrac{1}{n+1}\le\alpha\}$ (the strictest threshold that still meets the budget; the risk bound is non-decreasing in $\tau$)
 controls $\mathbb{E}[L_{n+1}(\hat\tau)]\le\alpha$ for an exchangeable test case under the calibration assumptions.
-For the joint $(k,\tau)$ we use a Learn-then-Test grid~\citep{angelopoulos2021ltt}, treating each configuration as a hypothesis and controlling the family-wise error via fixed-sequence testing.
+For the joint $(k,\tau)$ we use a Learn-then-Test grid~\citep{angelopoulos2021ltt}, treating each configuration as a hypothesis and controlling the family-wise error via fixed-sequence testing; this gives the high-probability guarantee $\Pr[R(\hat k,\hat\tau)\le\alpha]\ge 1-\delta$ rather than the expected-risk bound above.
 The achieved-vs-target risk is reported in RQ6 and Table~\ref{tab:risk_control_temporal}.
 
 \subsection{Temporal-Split Evidence-Coverage Audit}
