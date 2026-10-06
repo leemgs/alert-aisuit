@@ -99,3 +99,19 @@ that material NARROWS sets w = 0.50 from its date (§4.4 and the appendix edge-e
 - Paper type: long. Do not add an acknowledgments section in the review version.
 - Before uploading, revoke the GitHub token that appears in plain text in your
   assistant preferences.
+
+## 5. Round-4 review findings (2026-10-06)
+
+Fixed: in App. H, the conformal threshold now uses `sup` instead of `inf` (the
+omission risk is non-decreasing in τ, so `inf` would pick the trivial smallest
+threshold). The LTT joint (k, τ) guarantee is now stated as high-probability
+rather than expected-risk.
+
+Author checks; numbers are not changed here:
+
+| # | Finding | Why a reviewer will notice |
+|---|---|---|
+| J | Table 3 reports ± 0.02–0.04 on 82 human-adjudicated test cases | a 95% bootstrap CI for macro F1 near 0.79 with n = 82 is usually about ±0.08–0.09. ±0.02 would fit n ≈ 1,500. App. G also says the 5 seeds subsample the test fold, so state what ± measures (CI of F1, CI of the difference vs. B5, or seed spread) and recompute it with `analysis/compute_review_stats.py` |
+| K | Calibration set of 150 cases | the loss uses human-labeled High-risk theories, but only 400 cases are human-adjudicated (82 in test). State which split the 150 come from and that they do not overlap the test cases |
+| L | Table 5 and P2 still describe NARROWS as a "closure" | after the w(·) change, material NARROWS down-weights rather than closes, while the 0.77 recall and the 20.4% missed-closure rate are micro-averages that include NARROWS. Either re-run on OVERRULES/SUPERSEDES only, or state that "closure" there includes down-weighting edges |
+| M | PLRE evaluation split | state whether Tables 4 and 6 use all 1,856 pairs or only test pairs |
