@@ -302,7 +302,7 @@ Table~\ref{tab:edge_extraction} reports the per-relation accuracy of the treatme
 
 \begin{table}[h]
 \centering
-\caption{Severity-label agreement on the full held-out test set, including retained pre-labels (RQ1; reported for scale). B5 is matched to ALERT's mean iteration budget (not to total LLM calls or tokens).}
+\caption{Severity-label agreement on the full held-out test set, including retained pre-labels (RQ1; point estimates, reported for scale). B5 is matched to ALERT's mean iteration budget (not to total LLM calls or tokens).}
 \label{tab:rq1}
 \small
 \resizebox{\columnwidth}{!}{%
@@ -310,12 +310,12 @@ Table~\ref{tab:edge_extraction} reports the per-relation accuracy of the treatme
 \toprule
 \textbf{System} & \textbf{F1} & \textbf{Precision} & \textbf{Recall} \\
 \midrule
-B1 Rule-Based              & $0.62 \pm 0.02$ & $0.58 \pm 0.03$ & $0.67 \pm 0.02$ \\
-B2 Single-Pass LLM         & $0.72 \pm 0.02$ & $0.74 \pm 0.02$ & $0.70 \pm 0.03$ \\
-B3 RAG-only                & $0.74 \pm 0.02$ & $0.75 \pm 0.02$ & $0.72 \pm 0.02$ \\
-B4 Single-Agent            & $0.76 \pm 0.02$ & $0.77 \pm 0.02$ & $0.75 \pm 0.02$ \\
-B5 Self-Refinement         & $0.77 \pm 0.02$ & $0.78 \pm 0.02$ & $0.76 \pm 0.02$ \\
-\textbf{ALERT Full}        & $\mathbf{0.81 \pm 0.01}$ & $\mathbf{0.82 \pm 0.02}$ & $\mathbf{0.80 \pm 0.02}$ \\
+B1 Rule-Based              & $0.62$ & $0.58$ & $0.67$ \\
+B2 Single-Pass LLM         & $0.72$ & $0.74$ & $0.70$ \\
+B3 RAG-only                & $0.74$ & $0.75$ & $0.72$ \\
+B4 Single-Agent            & $0.76$ & $0.77$ & $0.75$ \\
+B5 Self-Refinement         & $0.77$ & $0.78$ & $0.76$ \\
+\textbf{ALERT Full}        & $\mathbf{0.81}$ & $\mathbf{0.82}$ & $\mathbf{0.80}$ \\
 \bottomrule
 \end{tabular}%
 }
@@ -613,17 +613,17 @@ LegalBERT & 2.30  & 0.4\% & $+0.00$ $[+0.00,+0.00]$             & $-0.4^{*}$ $[-
 \textbf{Primary endpoints.}
 \begin{itemize}[leftmargin=1.2em,itemsep=1pt,topsep=2pt]
   \item \emph{Edge agreement}: precision/recall/F1 of ALERT edges vs.\ citator-derived edges, per relation and micro-averaged over negative treatment.
-  \item \emph{Interval-closure agreement}: whether ALERT closes an interval no later than the citator's negative-treatment date; the closure-date error distribution (in days); and the rates of \emph{missed closures} (citator negative, ALERT open) and \emph{false closures} (ALERT closed, citator still good).
+  \item \emph{Interval-closure or down-weighting agreement}: whether ALERT acts (closes the interval for \textsc{overrules}/\textsc{supersedes}, down-weights for material \textsc{narrows}) no later than the citator's negative-treatment date; the action-date error distribution (in days); and the rates of \emph{missed actions} (citator negative, ALERT neither closes nor down-weights) and \emph{false actions} (ALERT acts, citator still good).
   \item \emph{Point-in-time correctness}: validity intervals are checked at multiple historical dates, not only the latest status, because citators are themselves time-varying.
 \end{itemize}
 
 \textbf{Downstream link.} On the disagreement subset, the PLRE/stale-cite audit is re-run with citator-corrected closures to measure the \emph{decision-flip rate}, connecting construct validity to risk-decision outcomes.
 
-\textbf{Acceptance criterion (pre-specified).} P2 succeeds iff negative-treatment micro-F1 vs.\ the citator $\ge\!0.80$ and the missed-closure rate is at or below the extractor's audited miss rate (23\%) underlying Table~\ref{tab:edge_sensitivity}; relation types failing the bar are routed to the human review queue and the residual is reported rather than suppressed.
+\textbf{Acceptance criterion (pre-specified).} P2 succeeds iff negative-treatment micro-F1 vs.\ the citator $\ge\!0.80$ and the missed-action rate is at or below the extractor's audited miss rate (23\%) underlying Table~\ref{tab:edge_sensitivity}; relation types failing the bar are routed to the human review queue and the residual is reported rather than suppressed.
 
 \textbf{Licensing and ethics.} Citator outputs are proprietary and are used solely as an evaluation reference under a licensed account. The release contains the crosswalk, sampling seeds, and agreement statistics, but no redistributed citator content, consistent with the data-governance boundary in the main text.
 
-\textbf{Measured P2 results.} The audit sampled $n\!=\!400$ treatment candidates, including 162 negative-treatment candidates. Inter-annotator agreement on the citator-to-ALERT crosswalk was substantial ($\kappa=0.78$). Edge-level agreement was measured against the citator-derived reference, and interval-closure behavior plus downstream impact were reported. Negative-treatment micro-F1 is 0.81 and the missed-closure rate is 20.4\%, satisfying the pre-specified P2 threshold and staying below the $\approx$23\% internal-gold miss rate of the extractor configuration evaluated in Table~\ref{tab:edge_sensitivity}, so the measured downstream effect there is not optimistic relative to the citator reference. Material \textsc{narrows} remains the weakest relation and is retained in the human-review queue. Edge-level agreement is reported in Table~\ref{tab:p2_edge}; interval-closure agreement and downstream decision impact are reported in Table~\ref{tab:p2_closure}.
+\textbf{Measured P2 results.} The audit sampled $n\!=\!400$ treatment candidates, including 162 negative-treatment candidates. Inter-annotator agreement on the citator-to-ALERT crosswalk was substantial ($\kappa=0.78$). Edge-level agreement was measured against the citator-derived reference, and interval-closure or down-weighting behavior plus downstream impact were reported. Negative-treatment micro-F1 is 0.81 and the missed-action rate (missed closures for \textsc{overrules}/\textsc{supersedes} or missed down-weighting for material \textsc{narrows}) is 20.4\%, satisfying the pre-specified P2 threshold and staying below the $\approx$23\% internal-gold miss rate of the extractor configuration evaluated in Table~\ref{tab:edge_sensitivity}, so the measured downstream effect there is not optimistic relative to the citator reference. Material \textsc{narrows} remains the weakest relation and is retained in the human-review queue. Edge-level agreement is reported in Table~\ref{tab:p2_edge}; interval-closure agreement and downstream decision impact are reported in Table~\ref{tab:p2_closure}.
 
 \begin{table}[t]
 \centering
@@ -649,7 +649,7 @@ Positive/neutral citation           & 160 & 0.93 & 0.95 & 0.94 \\
 
 \begin{table}[t]
 \centering
-\caption{Measured P2 closure agreement and downstream decision impact against the citator-derived reference.}
+\caption{Measured P2 action agreement (interval closure for \textsc{overrules}/\textsc{supersedes}, down-weighting for material \textsc{narrows}) and downstream decision impact against the citator-derived reference.}
 \label{tab:p2_closure}
 \small
 \setlength{\tabcolsep}{4pt}
@@ -658,12 +658,12 @@ Positive/neutral citation           & 160 & 0.93 & 0.95 & 0.94 \\
 \toprule
 \textbf{Metric} & \textbf{Value} \\
 \midrule
-Matched negative closures                          & 129 / 162 \\
-Missed-closure rate                                & 20.4\% \\
-False-closure rate                                 & 4.8\% \\
-Median closure-date error                          & 18 days \\
-Mean closure-date error                            & 31 days \\
-90th-percentile closure-date error                 & 74 days \\
+Matched negative-treatment actions                & 129 / 162 \\
+Missed-action rate                                 & 20.4\% \\
+False-action rate                                  & 4.8\% \\
+Median action-date error                          & 18 days \\
+Mean action-date error                            & 31 days \\
+90th-percentile action-date error                 & 74 days \\
 Point-in-time validity accuracy                    & 0.88 \\
 PLRE decision-flip rate after citator correction   & 3.8\% \\
 \bottomrule

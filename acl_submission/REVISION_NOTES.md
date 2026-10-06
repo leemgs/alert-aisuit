@@ -273,3 +273,11 @@ The matching "we do not report" clauses were removed. To be consistent with the
 `w(·)` schedule, material NARROWS now down-weights rather than closing intervals
 (see `SUBMISSION_FINAL_CHECK.md` §3). Repetitive sentences in §6.2, §6.5, §6.6 and
 the Discussion were shortened to keep the body within 8 pages.
+
+## Round-4 follow-up (2026-10-06)
+
+Table 3 / A.6 now report point estimates only: the previous ± widths could not be
+reproduced (no prediction file; a synthetic n = 82 run gives about ±0.09). The
+calibration-set source, the PLRE evaluation set (all 1,856 pairs) and the
+closure/down-weighting wording follow author statements; see
+`SUBMISSION_FINAL_CHECK.md` §5.
